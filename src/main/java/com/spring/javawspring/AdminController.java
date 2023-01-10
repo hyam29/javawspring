@@ -60,7 +60,7 @@ public class AdminController {
 		
 		List<MemberVO> vos = memberService.getMemberList(pageVo.getStartIdxNo(), pageSize, mid);
 		
-		model.addAttribute("vos", vos);// 이렇게 담으면 첫 페이지만 나옴
+		model.addAttribute("vos", vos);
 		model.addAttribute("pageVo", pageVo);
 		// model.addAttribute("pageSize", pageSize);
 		
@@ -72,7 +72,15 @@ public class AdminController {
 	@RequestMapping(value="/member/adminMemberLevel", method=RequestMethod.POST)
 	public String adminMemberLevelPost(int idx, int level) {
 		int res = adminService.setMemberLevelCheck(idx, level);
-		
+		return res+"";
+	}
+	
+	/* 회원 탈퇴 처리(ajax) */
+	@ResponseBody
+	@RequestMapping(value="/member/adminMemberDel", method=RequestMethod.POST)
+	public String adminMemberDelPost(int idx) {
+		int res = adminService.setAdminMemberDel(idx);
+		System.out.println("res : "+res);
 		return res+"";
 	}
 	

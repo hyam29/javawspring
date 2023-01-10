@@ -51,6 +51,10 @@ public class MessageController {
 			model.addAttribute("msg", "당신은 관리자가 아닙니다.");
 			model.addAttribute("url", "member/memberLogin");
 		}
+		else if(msgFlag.equals("adminMemberDelOk")) {
+			model.addAttribute("msg", "회원탈퇴 처리가 완료되었습니다.");
+			model.addAttribute("url", "admin/member/adminMemberList");
+		}
 		else if(msgFlag.equals("memberNo")) {
 			model.addAttribute("msg", "회원가입 후 우리사이트를 이용해주세요.");
 			model.addAttribute("url", "member/memberLogin");
@@ -102,6 +106,15 @@ public class MessageController {
 		else if(msgFlag.equals("fileUploadNo")) {
 			model.addAttribute("msg", "파일 업로드에 실패하였습니다.");
 			model.addAttribute("url", "study/fileUpload/fileUploadForm");
+		}
+		else if(msgFlag.equals("boardInputOk")) {
+			model.addAttribute("msg", "작성하신 글이 성공적으로 등록되었습니다!");
+			model.addAttribute("url", "board/boardList");
+		}
+		else if(msgFlag.equals("boardInputNo")) {
+			model.addAttribute("msg", "작성글 등록에 실패하였습니다.");
+			// boardInput으로 보낼 때, pag와 pageSize 넘길거면 컨트롤러에서도 넘겼어야 함...!
+			model.addAttribute("url", "board/boardInput");
 		}
 		
 		

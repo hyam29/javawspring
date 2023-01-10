@@ -15,22 +15,22 @@
 		function jusorokView() {
 			$("#myModal").on("show.bs.modal", function(e) {
 				$(".modal-header #cnt").html(${cnt});
-				let jusorok = '';
-				jusorok += '<table class="table table-hover"';
-				jusorok += '<tr class="table-dark text-dark text-center>"';
-				jusorok += '<th>번호</th><th>ID</th><th>성명</th><th colspan="2">이메일</th>';
-				jusorok += '</tr>';
-				jusorok += '<c:forEach var="vo" items="${vos}" varStatus="st">';
-				jusorok += '<tr onclick="location.href=\'${ctp}/study/mail/mailForm?email=${vo.email}\';" class="text-center">';
-				jusorok += '<td>${st.count}</td>';
-				jusorok += '<td>${vo.mid}</td>';
-				jusorok += '<td>${vo.name}</td>';
-				jusorok += '<td>${vo.email}</td>';
-				jusorok += '</tr>';
-				jusorok += '</c:forEach>';
-				jusorok += '';
-				jusorok += '</table>';
-				$(".modal-body #jusorok").html(jusorok);
+	    		let jusorok = '';
+	    		jusorok += '<table class="table table-hover">';
+	    		jusorok += '<tr class="table-dark text-dark text-center">';
+	    		jusorok += '<th>번호</th><th>아이디</th><th>성명</th><th>메일주소</th>';
+	    		jusorok += '</tr>';
+	    		jusorok += '<c:forEach var="vo" items="${vos}" varStatus="st">';
+	    		jusorok += '<tr onclick="location.href=\'${ctp}/study/mail/mailForm?email=${vo.email}\';" class="text-center">';
+	    		jusorok += '<td>${st.count}</td>';
+	    		jusorok += '<td>${vo.mid}</td>';
+	    		jusorok += '<td>${vo.name}</td>';
+	    		jusorok += '<td>${vo.email}</td>';
+	    		jusorok += '</tr>';
+	    		jusorok += '</c:forEach>';
+	    		jusorok += '';
+	    		jusorok += '</table>';
+	    		$(".modal-body #jusorok").html(jusorok);
 				/* 컨트롤러에서 편집해서 온다면, ${jusorok} 써도 되지만, view 부분이므로 여기서 편집*/
 			});
 		}

@@ -15,4 +15,10 @@ public class AdminServiceImpl implements AdminService {
 	public int setMemberLevelCheck(int idx, int level) {
 		return adminDAO.setMemberLevelCheck(idx, level);
 	}
+
+	@Override
+	public int setAdminMemberDel(int idx) {
+		return adminDAO.setAdminMemberDel(idx);
+		
+	}
 }

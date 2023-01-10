@@ -216,11 +216,11 @@ public class StudyController {
 	}
 	
 	/* 주소록 호출하기 */
-	/*
+	
 	@RequestMapping(value="/mail/mailForm", method=RequestMethod.GET)
 	public String mailFormGet(Model model, String email) {
 		
-		List<MemberVO> vos = memberService.getMemberList(0, 1000);
+		List<MemberVO> vos = memberService.getMemberList(0, 1000, "");
 		
 		model.addAttribute("vos", vos);
 		model.addAttribute("cnt", vos.size());
@@ -228,8 +228,6 @@ public class StudyController {
 		
 		return "study/mail/mailForm";
 	}
-	*/
-	
 	
 	/* 메일 전송 처리 (무조건 예외처리 필수) */
 	@RequestMapping(value="/mail/mailForm", method=RequestMethod.POST)

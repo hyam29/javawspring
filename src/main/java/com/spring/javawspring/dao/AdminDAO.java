@@ -6,4 +6,6 @@ public interface AdminDAO {
 
 	public int setMemberLevelCheck(@Param("idx") int idx, @Param("level") int level);
 
+	public int setAdminMemberDel(@Param("idx") int idx);
+
 }

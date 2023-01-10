@@ -5,5 +5,10 @@
 	<update id="setMemberLevelCheck">
 		update member2 set level = #{level} where idx = #{idx};
 	</update>
+	
+	
+	<delete id="setAdminMemberDel">
+		delete from member2 where idx = #{idx};
+	</delete>
 </mapper>
 

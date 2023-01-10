@@ -30,7 +30,7 @@
 	    /* let pageSize = $('select[name="pageSize"]').val(); */
 	    /* let pageSize = $("#pageSize option:selected").val(); */
 	    let pageSize = $("#pageSize").val();
-	    location.href="${ctp}/guest/guestList?pageSize="+pageSize+"&pag=${pag}";
+	    location.href="${ctp}/guest/guestList?pageSize="+pageSize+"&pag=${pageVo.pag}";
     }
   </script>
   
@@ -57,10 +57,10 @@
 			<td class="text-left">
 	      <select name="pageSize" id="pageSize" onchange="pageCheck()">
 	        <!-- <option value="" selected disabled>건 별 조회</option> -->
-	        <option value="5" ${pageSize==3   ? "selected" : ''}> 3건</option>
-					<option value="10" ${pageSize==6 ? "selected" : ''}>6건</option>
-					<option value="15" ${pageSize==12 ? "selected" : ''}>12건</option>
-					<option value="20" ${pageSize==30 ? "selected" : ''}>30건</option>
+	        <option value="3" ${pageVo.pageSize==3   ? "selected" : ''}> 3건</option>
+					<option value="6" ${pageVo.pageSize==6 ? "selected" : ''}>6건</option>
+					<option value="12" ${pageVo.pageSize==12 ? "selected" : ''}>12건</option>
+					<option value="30" ${pageVo.pageSize==30 ? "selected" : ''}>30건</option>
 	      </select>
 	 		 </td>
 			<td class="text-right">

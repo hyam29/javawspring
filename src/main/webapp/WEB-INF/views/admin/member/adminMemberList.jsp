@@ -24,8 +24,29 @@
     }
     
     function delCheck(idx) {
-    	let ans = confirm("탈퇴처리 시키겠습니까?");
-    	if(ans) location.href='${ctp}/admin/adminMemberDel?pag=${pageVo.pag}&idx='+idx;
+    	let ans = confirm("해당회원을 탈퇴처리 하겠습니까?");
+    	// if(ans) location.href='${ctp}/admin/member/adminMemberDel?pag=${pageVo.pag}&idx='+idx;
+    	if(!ans) return false;
+    	
+    	$.ajax({
+    		type : "post",
+    		url : "${ctp}/admin/member/adminMemberDel",
+    		data : {idx : idx},
+    		success : function(res) {
+    			if(res == "1") {
+    				alert("해당회원의 탈퇴처리가 완료되었습니다.");
+    				location.reload();
+    			}
+    			else {
+    				alert("탈퇴처리에 실패하였습니다.");
+    			}
+    		},
+    		error : function() {
+    			alert("탈퇴 전송 실패");
+    		}
+    	});
+    	
+    	
     }
     
     function searchCheck(e) {
@@ -60,7 +81,7 @@
 <div class="container">
   <h2 class="text-center">* 전체 회원 리스트 *</h2>
   <br/>
-  <form name="myform" method="post">
+  <form name="myform">
   	<div class="row mb-2">
   	  <div class="col form-inline">
   	    <input type="text" name="mid" class="form-control" autofocus />&nbsp;
@@ -80,9 +101,10 @@
       <th>등급</th>
       <th>탈퇴유무</th>
     </tr>
+    <c:set var="curScrStartNo" value="${pageVo.curScrStartNo}" />
     <c:forEach var="vo" items="${vos}" varStatus="st">
       <tr>
-        <td>${vo.idx}</td>
+        <td>${curScrStartNo}</td>
         <td><a href="${ctp}/adMemInfor.ad?mid=${vo.mid}&pag=${pageVo.pag}">${vo.mid}</a></td>
         <td>${vo.nickName}</td>
         <td>${vo.name}<c:if test="${sLevel == 0 && vo.userInfor == '비공개'}"><font color='red'>(비공개)</font></c:if></td>
@@ -109,6 +131,7 @@
           <c:if test="${vo.userDel!='OK'}">활동중</c:if>
         </td>
       </tr>
+    <c:set var="curScrStartNo" value="${curScrStartNo-1}" />
     </c:forEach>
     <tr><td colspan="8" class="m-0 p-0"></td></tr>
   </table>

@@ -3,6 +3,7 @@ package com.spring.javawspring.pagination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.javawspring.dao.BoardDAO;
 import com.spring.javawspring.dao.GuestDAO;
 import com.spring.javawspring.dao.MemberDAO;
 
@@ -14,6 +15,9 @@ public class PageProcess {
 	
 	@Autowired
 	MemberDAO memberDAO;
+	
+	@Autowired
+	BoardDAO boardDAO;
 
 	// 3번째 매개변수는 게시판 별로 사용할 것이므로 section 이라는 변수명으로 둠 (마음대로 해도 됨)
 	// 4번째 매개변수 부터는 마음대로! (여기서는 part, searchString)
@@ -28,6 +32,9 @@ public class PageProcess {
 		}
 		else if(section.equals("guest")) {
 			totRecCnt = guestDAO.totRecCnt();
+		}
+		else if(section.equals("board")) {
+			totRecCnt = boardDAO.totRecCnt(part, searchString);
 		}
 		
 		/* 페이징처리 */

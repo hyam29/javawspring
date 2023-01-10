@@ -9,7 +9,7 @@
   <title>adminLeft.jsp</title>
   <jsp:include page="/WEB-INF/views/include/bs4.jsp" />
 </head>
-<body style="background-color:#ddd">
+<body style="background-color:#cef">
 <p><br/></p>
 <div class="container text-center">
   <h5>관리자메뉴</h5>
