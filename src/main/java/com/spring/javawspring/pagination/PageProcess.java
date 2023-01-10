@@ -24,7 +24,7 @@ public class PageProcess {
 		
 		// 게시판이 바뀐다면 DAO만 바뀌면 됨.
 		if(section.equals("member")) {
-			totRecCnt = memberDAO.totRecCnt();
+			totRecCnt = memberDAO.totRecCnt(searchString);
 		}
 		else if(section.equals("guest")) {
 			totRecCnt = guestDAO.totRecCnt();

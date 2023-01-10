@@ -8,7 +8,7 @@
     <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="http://192.168.50.190:9090/javawspring" class="w3-bar-item w3-button w3-padding-large">HOME</a>
     <a href="${ctp}/guest/guestList" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Guest</a>
-    <c:if test="${sLevel < 5}">
+    <c:if test="${sLevel <= 4}">
 	    <a href="${ctp}/board/boardList" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Board</a>
 	    <a href="${ctp}/pds/pdsList" class="w3-bar-item w3-button w3-padding-large w3-hide-small">PDS</a>
 	    <div class="w3-dropdown-hover w3-hide-small">
@@ -20,6 +20,7 @@
 	        <a href="${ctp}/study/ajax/ajaxMenu" class="w3-bar-item w3-button">AJax 연습</a>
 	        <a href="${ctp}/study/mail/mailForm" class="w3-bar-item w3-button">메일연습</a>
 	        <a href="${ctp}/study/uuid/uuidForm" class="w3-bar-item w3-button">UUID</a>
+	        <a href="${ctp}/study/fileUpload/fileUploadForm" class="w3-bar-item w3-button">파일업로드연습</a>
 	        <a href="#" class="w3-bar-item w3-button">인터넷달력</a>
 	      </div>
 	    </div>
@@ -39,17 +40,18 @@
 	        <a href="${ctp}/member/memberMain" class="w3-bar-item w3-button">회원메인</a>
 	        <a href="#" class="w3-bar-item w3-button">웹메세지</a>
 	        <a href="${ctp}/member/memberList" class="w3-bar-item w3-button">회원리스트</a>
-	        <a href="#" class="w3-bar-item w3-button">회원정보수정</a>
-	        <a href="#" class="w3-bar-item w3-button">회원탈퇴</a>
-	        <a href="#" class="w3-bar-item w3-button">관리자</a>
+	        <a href="${ctp}/member/memberPwdCheck" class="w3-bar-item w3-button">회원정보수정</a>
+	        <a href="${ctp}/member/memberPwdUpdate" class="w3-bar-item w3-button">비밀번호수정</a>
+	        <a href="${ctp}/member/memberDelete" class="w3-bar-item w3-button">회원탈퇴</a>
+	        <a href="${ctp}/admin/adminMain" class="w3-bar-item w3-button">관리자</a>
 	      </div>
 	    </div>
 	    </c:if>
 	    <c:if test="${empty sLevel}">
 	      <a href="${ctp}/member/memberLogin" class="w3-padding-large w3-button">Login</a>
 	      <a href="${ctp}/member/memberJoin" class="w3-padding-large w3-button">Join</a>
-    </c:if>
-    <c:if test="${!empty sLevel}"><a href="${ctp}/member/memberLogout" class="w3-padding-large w3-button">Logout</a></c:if>
+    	</c:if>
+    	<c:if test="${!empty sLevel}"><a href="${ctp}/member/memberLogout" class="w3-padding-large w3-button">Logout</a></c:if>
     <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
   </div>
 </div>

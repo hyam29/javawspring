@@ -63,6 +63,46 @@ public class MessageController {
 			model.addAttribute("msg", "메일이 전송되었습니다!");
 			model.addAttribute("url", "study/mail/mailForm");
 		}
+		else if(msgFlag.equals("mamberImsiPwdOk")) {
+			model.addAttribute("msg", "임시비밀번호를 메일로 발송하였습니다.\\n로그인 후 비밀번호를 변경해주세요.");
+			model.addAttribute("url", "member/memberLogin");
+		}
+		else if(msgFlag.equals("mamberImsiPwdNo")) {
+			model.addAttribute("msg", "아이디, 이메일을 확인해주세요.");
+			model.addAttribute("url", "member/memberPwdSearch");
+		}
+		else if(msgFlag.equals("memberPwdNo")) {
+			model.addAttribute("msg", "비밀번호가 일치하지 않습니다.");
+			model.addAttribute("url", "member/memberPwdUpdate");
+		}
+		else if(msgFlag.equals("memberDeletePwdNo")) {
+			model.addAttribute("msg", "비밀번호가 일치하지 않습니다.");
+			model.addAttribute("url", "member/memberDelete");
+		}
+		else if(msgFlag.equals("memberDeleteOk")) {
+			model.addAttribute("msg", "회원탈퇴가 완료되었습니다.");
+			model.addAttribute("url", "member/memberLogout");
+		}
+		else if(msgFlag.equals("memberPwdUpdateOk")) {
+			model.addAttribute("msg", "비밀번호 변경이 완료되었습니다!");
+			model.addAttribute("url", "member/memberMain");
+		}
+		else if(msgFlag.equals("memberUpdatePwdNo")) {
+			model.addAttribute("msg", "비밀번호가 일치하지 않습니다.");
+			model.addAttribute("url", "member/memberPwdCheck");
+		}
+		else if(msgFlag.equals("memberUpdatePwdOk")) {
+			model.addAttribute("msg", "비밀번호가 일치합니다.\\n회원정보 수정 페이지로 이동합니다.");
+			model.addAttribute("url", "member/memberUpdate");
+		}
+		else if(msgFlag.equals("fileUploadOk")) {
+			model.addAttribute("msg", "파일이 업로드되었습니다!");
+			model.addAttribute("url", "study/fileUpload/fileUploadForm");
+		}
+		else if(msgFlag.equals("fileUploadNo")) {
+			model.addAttribute("msg", "파일 업로드에 실패하였습니다.");
+			model.addAttribute("url", "study/fileUpload/fileUploadForm");
+		}
 		
 		
 		return "include/message";

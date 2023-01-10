@@ -28,7 +28,7 @@
 	
 	<div id="memberInfo2">
     <h3>회원사진</h3>
-	  <p><img src="${ctp}/member/${vo.photo}" width="200px" /></p>
+	  <p><img src="${ctp}/resources/member/${vo.photo}" width="200px" /></p>
   </div>
 	
 	<hr id="memberInfo3" />

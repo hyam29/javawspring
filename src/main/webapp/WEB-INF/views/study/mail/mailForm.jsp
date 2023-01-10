@@ -79,13 +79,13 @@
 		<div class="modal-content" style="width:600px">
 			<div class="modal-header" style="width:600px">
 				<h4 class="modal-title">◈ 주 소 록 ◈(건수:<span id="cnt"></span>)</h4>
-				<button type="button" class="close" data-dissmiss="modal">&times;</button>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
 			</div>
 			<div class="modal-body" style="width:600px; heigth:400px; overflow:auto;">
 				<span id="jusorok"></span>
 			</div>
 			<div class="modal-footer" style="width:600px">
-				<button type="button" class="close btn btn-outline-dark" data-dissmiss="modal" >close</button>
+				<button type="button" class="close btn btn-outline-dark" data-dismiss="modal" >close</button>
 			</div>
 		</div>
 	</div>

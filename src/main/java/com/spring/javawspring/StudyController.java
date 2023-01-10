@@ -18,10 +18,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.common.ARIAUtil;
 import com.spring.javawspring.common.SecurityUtil;
@@ -216,6 +216,7 @@ public class StudyController {
 	}
 	
 	/* 주소록 호출하기 */
+	/*
 	@RequestMapping(value="/mail/mailForm", method=RequestMethod.GET)
 	public String mailFormGet(Model model, String email) {
 		
@@ -227,7 +228,7 @@ public class StudyController {
 		
 		return "study/mail/mailForm";
 	}
-	
+	*/
 	
 	
 	/* 메일 전송 처리 (무조건 예외처리 필수) */
@@ -310,4 +311,17 @@ public class StudyController {
 		return uid.toString();
 	}
 	
+	/* 파일 업로드 폼 */
+	@RequestMapping(value="/fileUpload/fileUploadForm", method=RequestMethod.GET)
+	public String fileUploadFormGet() {
+		return "study/fileUpload/fileUploadForm";
+	}
+	
+	/* 파일 업로드 처리 (request객체 사용해야 함) */
+	@RequestMapping(value="/fileUpload/fileUploadForm", method=RequestMethod.POST)
+	public String fileUploadFormPost(MultipartFile fName) {
+		int res = studyService.fileUpload(fName);
+		if(res == 1) return "redirect:/msg/fileUploadOk";
+		else return "redirect:/msg/fileUploadNo";
+	}
 }

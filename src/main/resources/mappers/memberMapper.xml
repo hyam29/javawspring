@@ -2,6 +2,9 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spring.javawspring.dao.MemberDAO">
+	<select id="getMemberIdSearch" resultType="com.spring.javawspring.vo.MemberVO">
+		select mid from member2 where email = #{email};
+	</select>
 	<select id="getMemberIdCheck" resultType="com.spring.javawspring.vo.MemberVO">
 		select * from member2 where mid=#{mid};
 	</select>
@@ -9,11 +12,12 @@
 		select * from member2 where nickName=#{nickName};
 	</select>
 	<select id="totRecCnt" resultType="int">
-		select count(*) from member2;
+		select count(*) from member2 <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if>;
 	</select>
 	<select id="getMemberList" resultType="com.spring.javawspring.vo.MemberVO">
-		select * from member2 order by idx desc limit #{startIdxNo}, #{pageSize};
+		select * from member2 <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if> order by idx desc limit #{startIdxNo},#{pageSize};
 	</select>
+	
 	<select id="totTermRecCnt" resultType="int">
 		<!-- 
 		<if test="mid == ''">
@@ -38,8 +42,6 @@
 	</select>
 	
 	
-	
-	
 	<insert id="setMemberJoinOk">
 		insert into member2 values (default, #{vo.mid}, #{vo.pwd}, #{vo.nickName}, #{vo.name}, #{vo.gender}, #{vo.birthday}, #{vo.tel}, #{vo.address}, #{vo.email}, #{vo.homePage}, #{vo.job}, #{vo.hobby}, #{vo.photo}, #{vo.content}, #{vo.userInfor}, default, default, default, default, default, default, default);
 	</insert>
@@ -47,6 +49,12 @@
 	
 	<update id="setMemTotalUpdate">
 		update member2 set lastDate=now(), todayCnt=#{todayCnt}, visitCnt=visitCnt+1, point=#{nowTodayPoint} where mid = #{mid};
+	</update>
+	<update id="setMemberDelete">
+		update member2 set userDel='OK' where mid = #{mid};
+	</update>
+	<update id="setMemberPwdUpdate">
+		update member2 set pwd = #{pwd} where mid = #{mid};
 	</update>
 	
 </mapper>

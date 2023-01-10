@@ -2,6 +2,8 @@ package com.spring.javawspring.service;
 
 import java.util.ArrayList;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.spring.javawspring.vo.GuestVO;
 
 public interface StudyService {
@@ -15,5 +17,7 @@ public interface StudyService {
 	public ArrayList<GuestVO> getGuestNames(String mid);
 
 	public ArrayList<GuestVO> getGuestPart(String part, String mid);
+
+	public int fileUpload(MultipartFile fName);
 	
 }

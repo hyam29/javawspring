@@ -1,13 +1,19 @@
 package com.spring.javawspring;
 
 import java.util.List;
+import java.util.UUID;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.pagination.PageVO;
@@ -33,6 +40,9 @@ public class MemberController {
 	
 	@Autowired
 	PageProcess pageProcess;
+	
+	@Autowired
+	JavaMailSender mailSender;
 	
 	@RequestMapping(value = "/memberLogin", method=RequestMethod.GET)
 	public String memberLoginGet(HttpServletRequest request) {
@@ -141,9 +151,7 @@ public class MemberController {
 	
 	/* 회원가입 처리 */
 	@RequestMapping(value = "/memberJoin", method=RequestMethod.POST)
-	public String memberJoinPost(MemberVO vo) {
-		//System.out.println("memberVo : " + vo);
-		
+	public String memberJoinPost(MultipartFile fName, MemberVO vo) {
 		// 동일 ID, 닉네임 백엔드 중복 체크 (중요한 부분만 백엔드에서 중복확인! 참고: 유효성검사는 VO에서 함)
 		if(memberService.getMemberIdCheck(vo.getMid()) != null) {
 			return "redirect:/msg/memberIdCheckNo";
@@ -155,9 +163,9 @@ public class MemberController {
 		// 비밀번호 암호화(BCryptPasswordEncoder)
 		vo.setPwd(passwordEncoder.encode(vo.getPwd()));
 		
-		// 체크가 완료되면 vo에 담긴 자료를 DB에 저장! (회원가입)
-		int res = memberService.setMemberJoinOk(vo);
-		System.out.println("res : " + res);
+		// 체크가 완료되면 사진파일 업로드 후, vo에 담긴 자료를 DB에 저장! (회원가입) -> 서비스 객체에서 수행 처리
+		int res = memberService.setMemberJoinOk(fName, vo);
+		
 		if(res == 1) return "redirect:/msg/memberJoinOk";
 		else return "redirect:/msg/memberJoinNo";
 	}
@@ -269,10 +277,10 @@ public class MemberController {
 		// 3번째 매개변수까지 필수이고 뒤에 공백으로 둔 것은 확장성을 위해 임의로 넣어줌 (이게 없다면 나중에 추가하기 힘듦)
 		// PageVO pageVo = pageProcess.totRecCnt(pag, pageSize, "member", "", "");
 		
-		// 검색기 -> 과제???
-		PageVO pageVo = pageProcess.totRecCnt(pag, pageSize, "member", "", "");
+		// 검색기 처리 (4번째 "" -> part)
+		PageVO pageVo = pageProcess.totRecCnt(pag, pageSize, "member", "", mid);
 		
-		List<MemberVO> vos = memberService.getMemberList(pageVo.getStartIdxNo(), pageSize);
+		List<MemberVO> vos = memberService.getMemberList(pageVo.getStartIdxNo(), pageSize, mid);
 		
 		model.addAttribute("vos", vos);// 이렇게 담으면 첫 페이지만 나옴
 		model.addAttribute("pageVo", pageVo);
@@ -280,5 +288,205 @@ public class MemberController {
 		
 		return "member/memberList";
 	}
+
+	@RequestMapping(value="/memberDelete", method=RequestMethod.GET)
+	public String memberDeleteGet() {
+		return "member/memberDelete";
+	}
+	
+	@RequestMapping(value="/memberDelete", method=RequestMethod.POST)
+	public String memberDeletePost(
+			@RequestParam(name="mid", defaultValue = "", required = false) String mid, 
+			@RequestParam(name="pwd", defaultValue = "", required = false) String pwd) {
+		
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		if(!passwordEncoder.matches(pwd, vo.getPwd())) {
+			return "redirect:/msg/memberPwdNo";
+		}
+		else if(passwordEncoder.matches(pwd, vo.getPwd())) {
+			memberService.setMemberDelete(mid);
+		}
+		return "redirect:/msg/memberDeleteOk";
+	}
+	
+	@RequestMapping(value="/memberPwdSearch", method=RequestMethod.GET)
+	public String memberPwdSearchGet() {
+		return "member/memberPwdSearch";
+	}
+	
+	/* 비밀번호 찾기를 위한 임시비밀번호 발급 처리 (임시비밀번호를 생성시켜 메일로 보내기) */
+	@RequestMapping(value="/memberPwdSearch", method=RequestMethod.POST)
+	public String memberPwdSearchPost(String mid, String toMail) {
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		if(vo.getEmail().equals(toMail)) {
+			// 회원정보가 맞다면, 임시비밀번호를 발급
+			UUID uid = UUID.randomUUID();
+			String pwd = uid.toString().substring(0, 8);
+			
+			// 임시비밀번호를 암호화(인코딩)처리시켜 DB에 저장
+			memberService.setMemberPwdUpdate(mid, passwordEncoder.encode(pwd));
+			String content = pwd;
+			
+			// 임시비밀번호를 메일로 전송 처리 (mailSend 메소드 생성)
+			String res = mailSend(toMail, content);
+			
+			if(res.equals("1")) return "redirect:/msg/mamberImsiPwdOk";
+			else return "redirect:/msg/mamberImsiPwdNo";
+		}
+		else {
+			return "redirect:/msg/mamberImsiPwdNo";
+		}
+	}
+	
+	// public 접근제한자로 mailSend 생성! (나중에 또 사용될 수도 있으니까)
+	public String mailSend(String toMail, String content) {
+		try {
+			String title = "우리 사이트에서 발급된 임시비밀번호입니다.";
+			
+			// 메일을 전송하기 위한 객체 : MimeMessage(), MimeMessageHelper()(보관함)
+			// mailSender 위에 @Autowired 어노테이션 해둬야 함!
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+			
+			// 메일보관함에 회원이 보내온 메세지들을 모두 저장시킴
+			messageHelper.setTo(toMail); // 위에 변수 선언안하고 여기에 vo.getToMail()로 작성해도 됨.
+			messageHelper.setSubject(title);
+			messageHelper.setText(content);
+			
+			// 전송 시, 내용(content)이 없더라도 그냥 보내짐. 따라서, 정보를 좀 더 추가해서 보내는 것이 좋음!
+			
+			// 메세지 보관함의 내용(content) 편집 후 필요한 정보를 좀 더 추가해서 전송 처리
+			// project때는, 방문하기 주소를 memberLogin으로 보내면 됨!
+			content = "<br><hr><h3><font color='blue'>임시 비밀번호는<font color='red'>"+content+"</font>입니다.<font><h3><hr><br>";
+			content += "<br><hr><h3><font color='grey'>우리 사이트에 로그인 하여 비밀번호를 변경해주시기 바랍니다.<font><h3><hr><br>";
+			content += "<p>방문하기 ▶ <a href='http://49.142.157.251:9090/green2209J_04/'>그린현대미술관</a></p>";
+			// 경로 작은따옴표 안먹을 때 있어서, ""로 작성
+			content += "<p><img src=\"cid:main.png\" width='500px' ></p>";
+			content += "<br><hr><h3><font color='grey'>from. Green Museum<font><h3><hr><br>";
+			content += "<hr>";
+			// 편집된 content로 보내겠다.
+			messageHelper.setText(content, true);
+
+			// 기재된 그림파일의 경로를 따로 표시처리 한 후 보관함에 다시 저장 (순서 중요)
+			FileSystemResource file = new FileSystemResource("D:\\JavaWorkspace\\springframework\\works\\javawspring\\src\\main\\webapp\\resources\\images\\main.png");
+			// 그림파일 저장("그림파일명", 객체변수(file))
+			messageHelper.addInline("main.png", file);
+			
+			// 메일 전송하기
+			mailSender.send(message);
+			return "1";
+			
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+		return "0";
+	}
+	
+	/* 비밃전호 수정 처리 폼 */
+	@RequestMapping(value="/memberPwdUpdate", method=RequestMethod.GET)
+	public String memberPwdUpdateGet() {
+		return "member/memberPwdUpdate";
+	}
+	
+	/* 비밀번호 수정 처리 */
+	@RequestMapping(value="/memberPwdUpdate", method=RequestMethod.POST)
+	public String memberPwdUpdatePost(String mid, String oldPwd, String newPwd) {
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		if(!passwordEncoder.matches(oldPwd, vo.getPwd())) {
+			return "redirect:/msg/memberPwdNo";
+		}
+		else if(passwordEncoder.matches(oldPwd, vo.getPwd())) {
+			memberService.setMemberPwdUpdate(mid, passwordEncoder.encode(newPwd));
+		}
+		return "redirect:/msg/memberPwdUpdateOk";
+	}	
+	
+	//아이디 찾기 (과제)
+	@RequestMapping(value="/memberIdSearch", method=RequestMethod.GET)
+	public String memberIdSearchGet() {
+		return "member/memberIdSearch";
+	}	
+	
+	@ResponseBody
+	@RequestMapping(value="/memberIdSearch", method=RequestMethod.POST)
+	public String memberIdSearchPost(Model model,
+			@RequestParam(name="email", defaultValue = "", required = false) String email) {
+		MemberVO vo = memberService.getMemberIdSearch(email);
+		String res = "0";
+   if(vo == null) {
+     res = "0";
+   }
+   else {
+   	res = vo.getMid();
+   }
+   // response.getWriter().write(mid);
+		
+   /*
+   int midLength = mid.length();
+   char[] strMid = mid.toCharArray();
+   mid = "";
+   for(int i=0; i<midLength; i++) {
+    // if(2 < i && i <= 5) strMid[i] = '*';
+    // if(8 < i && i <= 11) strMid[i] = '*';
+     if(i > 4) strMid[i] = '*';
+     mid += strMid[i];
+   }
+   */
+		
+		return res;
+	}
+	
+	/* 멤버 상세보기 */
+	@RequestMapping(value="/memberInfor", method=RequestMethod.GET)
+	public String memberInforGet(Model model, String mid,
+			@RequestParam(name="pag", defaultValue = "1", required = false)	int pag) {
+		
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		
+		String strLevel = "";
+		if(vo.getLevel() == 0) strLevel = "관리자";
+		else if(vo.getLevel() == 1) strLevel = "운영자";
+		else if(vo.getLevel() == 2) strLevel = "우수회원";
+		else if(vo.getLevel() == 3) strLevel = "정회원";
+		else if(vo.getLevel() == 4) strLevel = "준회원";
+		
+		
+		model.addAttribute("vo", vo);
+		model.addAttribute("sStrLevel", strLevel);
+		model.addAttribute("pag", pag);
+		
+		return "member/memberInfor";
+	}
+	
+	/* 회원정보 수정 전 비밀번호 확인 폼 */
+	@RequestMapping(value="/memberPwdCheck", method=RequestMethod.GET)
+	public String memberPwdCheckGet() {
+		return "member/memberPwdCheck";
+	}
+	
+	/* 회원정보 수정 전 비밀번호 확인 처리 */
+	@RequestMapping(value="/memberPwdCheck", method=RequestMethod.POST)
+	public String memberPwdCheckPost(@RequestParam(name="mid", defaultValue = "", required = false) String mid,
+			@RequestParam(name="pwd", defaultValue = "", required = false) String pwd) {
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		if(!passwordEncoder.matches(pwd, vo.getPwd())) {
+			return "redirect:/msg/memberUpdatePwdNo";
+		}
+		else if(passwordEncoder.matches(pwd, vo.getPwd())) {
+			memberService.setMemberDelete(mid);
+		}
+		return "redirect:/msg/memberUpdatePwdOk";
+		
+	}
+	
+	/* 회원정보 수정하기 폼 */
+	@RequestMapping(value="/memberUpdate", method=RequestMethod.GET)
+	public String memberUpdateGet(Model model, HttpSession session) {
+		String mid = (String) session.getAttribute("sMid");
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		model.addAttribute("vo", vo);
+		return "member/memberUpdate";
+	}
+	
 	
 }

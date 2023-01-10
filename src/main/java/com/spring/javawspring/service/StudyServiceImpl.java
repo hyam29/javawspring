@@ -1,9 +1,17 @@
 package com.spring.javawspring.service;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.dao.StudyDAO;
 import com.spring.javawspring.vo.GuestVO;
@@ -141,5 +149,37 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public ArrayList<GuestVO> getGuestPart(String part, String mid) {
 		return studyDAO.getGuestPart(part, mid);
+	}
+
+	// fileUpload와 writeFile 메소드 2개 common package에 넣어두기 (많이 사용되므로) -> fileUpload와 writeFile 세트
+	@Override
+	public int fileUpload(MultipartFile fName) {
+		int res = 0;
+		try {
+			UUID uid = UUID.randomUUID();
+			String oFileName = fName.getOriginalFilename();
+			String saveFileName = uid + "_" +oFileName;
+			
+			writeFile(fName, saveFileName);
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return res;
+		
+	}
+
+	public void writeFile(MultipartFile fName, String saveFileName) throws IOException {
+		byte[] data = fName.getBytes();
+		
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		// request.getRealPath("/resources/pds/temp/");
+		// 노란줄이 싫다면 아래와 같이 작성. 
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/pds/temp/");
+		// 업로드 된 파일을 꺼내와서 서버에 저장하는 부분
+		FileOutputStream fos = new FileOutputStream(realPath + saveFileName);
+		fos.write(data);
+		fos.close();
 	}
 }

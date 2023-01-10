@@ -33,6 +33,14 @@
 	<!-- BCryptPasswordEncoder 객체를 위한 Bean 등록 -->
 	<beans:bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
+	<!-- 파일업로드에 필요한 라이브러리를 Bean으로 등록 -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	<!-- value="파일용량" (1024*1024*2(20MByte)) <- 이렇게 작성하면 잘 안될때가 있어서 직접 계산값 넣음 -->
+		<beans:property name="maxUploadSize" value="20971520" />
+		<beans:property name="defaultEncoding" value="utf-8" />
+	</beans:bean>
+
+
 	<!-- Interceptor 설정 -->	
 	<beans:bean id="level0Interceptor" class="com.spring.javawspring.interceptor.Level0Interceptor" />
 	<beans:bean id="level3Interceptor" class="com.spring.javawspring.interceptor.Level3Interceptor" />
@@ -59,6 +67,8 @@
 			<exclude-mapping path="/member/memberIdCheck"/>
 			<exclude-mapping path="/member/memberNickNameCheck"/>
 			<exclude-mapping path="/member/memberList"/>
+			<exclude-mapping path="/member/memberPwdSearch"/>
+			<exclude-mapping path="/member/memberIdSearch"/>
 			<beans:ref bean="level4Interceptor" />
 		</interceptor>
 		
