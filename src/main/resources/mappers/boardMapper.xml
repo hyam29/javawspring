@@ -3,15 +3,35 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spring.javawspring.dao.BoardDAO">
 	<select id="totRecCnt" resultType="int">
-		select count(*) from board2 <if test="searchString != ''"> where ${part} like concat('%',#{searchString},'%') </if>;
+		select count(*) from board2 <if test="searchString != ''"> where ${search} like concat('%',#{searchString},'%') </if>;
+		<!-- select count(*) from board2; -->
 	</select>
+	
 	<select id="getBoardList" resultType="com.spring.javawspring.vo.BoardVO">
-		select * from board2 <if test="searchString != ''"> where ${part} like concat('%',#{searchString},'%') </if> order by idx desc limit #{startIdxNo}, #{pageSize};
+		select *, datediff(now(), wDate) as day_diff, timestampdiff(hour, wDate, now()) as hour_diff from board2 <if test="searchString != ''"> where ${search} like concat('%',#{searchString},'%') </if> order by idx desc limit #{startIdxNo}, #{pageSize};
+		<!-- select * from board2 order by idx desc limit #{startIndexNo},#{pageSize}; -->
 	</select>
+	
 	<select id="getBoardContent" resultType="com.spring.javawspring.vo.BoardVO">
 		select * from board2 where idx = #{idx};
 	</select>
 	
+	<select id="getPrevNext" resultType="com.spring.javawspring.vo.BoardVO">
+		select idx, title from board2 where idx in(
+		(select idx from board2 where <![CDATA[idx < #{idx}]]> order by idx desc limit 1),
+		(select idx from board2 where <![CDATA[idx > #{idx}]]> limit 1));
+		<!-- 
+			CDATA 작성법(대문자) -> <![CDATA[조건 ex: idx < 10]]>
+			MyBatis에서 부등호 에러 -> gt, lt 등으로 사용해도 되지만, 실무에서는 CDATA로 많이 사용!
+			(select idx from board2 where idx < #{idx} order by idx desc limit 1), 
+			(select idx from board2 where idx > #{idx} limit 1));
+		-->
+	</select>
+	
+	<select id="getBoardGoodCheck" resultType="com.spring.javawspring.vo.GoodVO">
+		select * from good where partIdx = #{partIdx} and part = #{part} and mid = #{mid};
+	</select>
+
 	
 	<!-- 값 하나만 넣는다면, insert into board2 (필드명 ex: mid) values (필드값 ex: #{mid}); -->
 	<insert id="setBoardInput">
@@ -25,5 +45,16 @@
 	<update id="setBoardGood">
 		update board2 set good = good + 1 where idx = #{idx};
 	</update>
+	<update id="setGoodPlusMinus">
+		update  board2 set good = good + #{goodCnt} where idx = #{idx};
+	</update>
+	<update id="setBoardUpdateOk">
+		update board2 set title=#{vo.title}, email=#{vo.email}, homePage=#{vo.homePage}, content=#{vo.content}, hostIp=#{vo.hostIp}  where idx = #{vo.idx};
+	</update>
+	
+	
+	<delete id="setBoardDeleteOk">
+		delete from board2 where idx = #{idx};
+	</delete>
 </mapper>
 

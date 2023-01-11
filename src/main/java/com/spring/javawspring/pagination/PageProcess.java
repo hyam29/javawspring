@@ -35,7 +35,9 @@ public class PageProcess {
 		}
 		else if(section.equals("board")) {
 			totRecCnt = boardDAO.totRecCnt(part, searchString);
+			//totRecCnt = boardDAO.totRecCnt();
 		}
+		
 		
 		/* 페이징처리 */
 		int totPage = (totRecCnt % pageSize) == 0 ? totRecCnt / pageSize : (totRecCnt / pageSize) + 1;

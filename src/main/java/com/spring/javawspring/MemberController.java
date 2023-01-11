@@ -285,7 +285,7 @@ public class MemberController {
 		model.addAttribute("vos", vos);// 이렇게 담으면 첫 페이지만 나옴
 		model.addAttribute("pageVo", pageVo);
 		// model.addAttribute("pageSize", pageSize);
-		
+		model.addAttribute("mid", mid);
 		return "member/memberList";
 	}
 

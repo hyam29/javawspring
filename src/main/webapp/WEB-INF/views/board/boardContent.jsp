@@ -12,6 +12,7 @@
   <jsp:include page="/WEB-INF/views/include/bs4.jsp" />
   <script>
   	'use strict';
+  	/* 좋아요 빨간색 하트 처리 -> db로 처리하게끔 만들어 보기(지금은 세션처리 되어있음) */
   	function goodCheck() {
   		$.ajax({
   			type: "post",
@@ -26,42 +27,30 @@
   		});
   	}
   	 /* data : idx는 int라서 그냥 작성! String이라면, idx: "$ { vo . 변수명}" 따옴표 꼭 필요!!!!!!! */
-  	
-  	 // 좋아요 증가와 감소는 같은 로직에 goodCnt 만 +- 1 해주면 되기 때문에, 같은 command 사용
-		function goodCheckPlus() {
-			$.ajax({
-				type  : "post",
-				url   : "${ctp}/boardGoodPlusMinus",
-				data  : {
-					idx : ${vo.idx},
-					goodCnt : 1
-				},
-				success:function() {
-					location.reload();
-				}
-			});
-		}
 		
-		function goodCheckMinus() {
-			$.ajax({
-				type  : "post",
-				url   : "${ctp}/boardGoodPlusMinus",
-				data  : {
-					idx : ${vo.idx},
-					goodCnt : -1
-				},
-				success:function() {
-					location.reload();
-				}
-			});
-		}
+		// 좋아요 Plus버튼누르면 1증가처리 (Minus버튼클릭시 1감소처리)
+    function goodCheckPlusMinus(flag) {
+    	$.ajax({
+    		type  : "post",
+    		url   : "${ctp}/board/boardGoodPlusMinus",
+    		data  : {
+    			idx : ${vo.idx},
+    			goodCnt : flag
+    		},
+    		success:function(res) {
+    			if(res == "1") alert("이미 누르셨습니다.");
+    			else location.reload();
+    		}
+    	});
+    }
 		
 		// 게시글 삭제 처리
 		function boardDelCheck() {
 			let ans = confirm("게시글을 삭제하시겠습니까?");
-			if(ans) location.href="${ctp}/board/boardDeleteOk?idx=${vo.idx}&pageSize=${pageSize}&pag=${pag}&mid=${vo.mid}";
+			if(ans) location.href="${ctp}/board/boardDeleteOk?idx=${vo.idx}&pageSize=${pageSize}&pag=${pag}";
 		}
 		// onclick 함수에서 매개변수 idx를 넘겨줬다면, 컨트롤러에 값 넘길 때 + idx 만 적으면 됨 
+		
 		
 		// 댓글 달기 처리
 		function replyCheck() {
@@ -166,8 +155,14 @@
             <c:if test="${sSw != '1'}">❤</c:if>
           </a>
           ${vo.good} ,
-          <a href="javascript:goodCheckPlus()">👍</a>
-          <a href="javascript:goodCheckMinus()">👎</a>
+          <a href="javascript:goodCheckPlusMinus(1)">👍</a>
+          <a href="javascript:goodCheckPlusMinus(-1)">👎</a> , 
+          
+          <!-- idx, mid 넘겨줘야 함 -->
+      		<a href="javascript:goodDBCheck(${goodVo.goodSw})">
+            <c:if test="${goodVo.goodSw == 'Y'}"><font color="red">❤</font></c:if>
+            <c:if test="${goodVo.goodSw != 'Y'}">❤</c:if>
+          </a> (DB처리 좋아요)
       </td>
     </tr>
 		<tr>
@@ -194,19 +189,33 @@
 	<!-- 이전글/다음글 처리 -->
 	  <table class="table table-borderless">
 	    <tr>
-	      <td style="float:left">
-	        <c:if test="${preVo.preIdx != 0}">
-	          👈 <a href="${ctp}/board/boardContent?idx=${preVo.preIdx}&pageSize=${pageSize}&pag=${pag}">이전글 : ${preVo.preTitle}</a><br/>
-	        </c:if>
+	    	<td>
+	      	<!--
+	      	<td style="float:left">
+		        <c:if test="${preVo.preIdx != 0}">
+		          👈 <a href="${ctp}/board/boardContent?idx=${preVo.preIdx}&pageSize=${pageSize}&pag=${pag}">이전글 : ${preVo.preTitle}</a><br/>
+		        </c:if>
+		      </td>
+		      <td style="float:right">
+		        <c:if test="${nextVo.nextIdx != 0}">
+		          👉 <a href="${ctp}/board/boardContent?idx=${nextVo.nextIdx}&pageSize=${pageSize}&pag=${pag}">다음글 : ${nextVo.nextTitle}</a>
+		        </c:if>
+		      </td>
+          -->
+          <c:if test="${!empty pnVos[1]}">
+          	다음글 : <a href="${ctp}/board/boardContent?idx=${pnVos[1].idx}&pageSize=${pageSize}&pag=${pag}">${pnVos[1].title}</a><br/>
+          </c:if>
+          <c:if test="${vo.idx < pnVos[0].idx}">
+          	다음글 : <a href="${ctp}/board/boardContent?idx=${pnVos[0].idx}&pageSize=${pageSize}&pag=${pag}">${pnVos[0].title}</a><br/>
+        	</c:if>
+          <c:if test="${vo.idx > pnVos[0].idx}">
+          	이전글 : <a href="${ctp}/board/boardContent?idx=${pnVos[0].idx}&pageSize=${pageSize}&pag=${pag}">${pnVos[0].title}</a><br/>
+        	</c:if>
 	      </td>
-	      <td style="float:right">
-	        <c:if test="${nextVo.nextIdx != 0}">
-	          👉 <a href="${ctp}/board/boardContent?idx=${nextVo.nextIdx}&pageSize=${pageSize}&pag=${pag}">다음글 : ${nextVo.nextTitle}</a>
-	        </c:if>
-	      </td>
+	      
 	    </tr>
 	  </table>
-	  <!-- 이전글/다음글 처리 끝 -->
+  <!-- 이전글/다음글 처리 끝 -->
   </c:if>
 </div>
 <br/>
@@ -225,7 +234,7 @@
 				<td>${replyVo.nickName}</td>	
 				<td>${fn:replace(replyVo.content, newLine, "<br/>")}</td>
 				<td class="text-center">${fn:substring(replyVo.WDate, 0, fn:length(replyVo.WDate)-2)}</td>
-<%-- 				<td class="text-center">${fn:substring(replyVo.WDate, 0, 19)}</td> --%>
+				<%-- <td class="text-center">${fn:substring(replyVo.WDate, 0, 19)}</td> --%>
 				<td class="text-center">${replyVo.hostIp}</td>
 				<td>
 					<c:if test="${sLevel == 0 || sMid == replyVo.mid}">
@@ -238,7 +247,6 @@
 <!-- 댓글 출력 창 끝 -->
 
 <!-- 댓글 입력창 시작 -->
-	<%-- <form name="replyForm" method="post" action="${ctp}/boReplyInput.bo"> --%> <!-- ajax 처리할 부분이라서 사실 필요없음... ajax는 get방식...(URL에 값 담아가니까) -->
 	<form name="replyForm">
 		<table class="table text-center">
 			<tr>
@@ -255,12 +263,6 @@
 				</td>
 			</tr>
 		</table>
-		
-		<!-- ajax 라서 hidden으로 값 넘기는 것도 의미가 없음 -->
-		<%-- <input type="hidden" name="boardIdx" value="${vo.idx}" />
-		<input type="hidden" name="hostIp" value="${pageContext.request.remoteAddr}" />
-		<input type="hidden" name="mid" value="${sMid}" />
-		<input type="hidden" name="nickName" value="${sNickName}" /> --%>
 	</form>
 <!-- 댓글 입력창 끝 -->
 </div>

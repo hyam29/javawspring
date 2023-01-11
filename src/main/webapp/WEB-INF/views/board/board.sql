@@ -16,6 +16,10 @@ create table board2 (
 	primary key (idx)
 );
 
+
+select count(*) from board2 where nickName like '%관리자%';
+
+
 /* 게시판에 댓글 달기 (해당 게시글의 idx의 댓글이기때문에 외래키 지정 필요) */
 create table boardReply2 (
 	idx int not null auto_increment ,		/* 댓글의 고유번호 */

@@ -59,8 +59,8 @@
 <jsp:include page="/WEB-INF/views/include/slide2.jsp" />
 <p><br/></p>
 <div class="container text-center">
-    <c:if test="${empty vo.mid}"><h2>전체 회원 리스트</h2></c:if>
-    <c:if test="${!empty vo.mid}"><h2><font color='blue'><b>${vo.mid}</b></font> 회원 리스트(총<font color='red'>${pageVo.totRecCnt}</font>건)</h2></c:if>
+    <c:if test="${empty mid}"><h2>전체 회원 리스트</h2></c:if>
+    <c:if test="${!empty mid}"><h2><font color='blue'><b>${mid}</b></font> 회원 리스트(총<font color='red'>${pageVo.totRecCnt}</font>건)</h2></c:if>
   <br/>
   <form name="myform">
   	<div class="row mb-2">

@@ -13,7 +13,9 @@ public class MessageController {
 	@RequestMapping(value="/msg/{msgFlag}", method=RequestMethod.GET)
 	public String msgGet(@PathVariable String msgFlag, Model model, 
 			// @RequestParam : null값 처리 및 초기값 지정(defaultValue) 가능
-			@RequestParam(value="mid", defaultValue="", required=false) String mid) {
+			@RequestParam(value="mid", defaultValue="", required=false) String mid,
+			// pag, pageSize 넘기기 위해 flag 변수 생성
+			@RequestParam(value="flag", defaultValue="", required=false) String flag) {
 		
 		if(msgFlag.equals("memberLoginOk")) {
 			model.addAttribute("msg", mid + "님 로그인 되었습니다.");
@@ -113,8 +115,17 @@ public class MessageController {
 		}
 		else if(msgFlag.equals("boardInputNo")) {
 			model.addAttribute("msg", "작성글 등록에 실패하였습니다.");
-			// boardInput으로 보낼 때, pag와 pageSize 넘길거면 컨트롤러에서도 넘겼어야 함...!
+			// boardInput으로 보낼 때, pag와 pageSize 넘길거면 컨트롤러에서도 넘겼어야 함...! -> 삭제에서 pag,pageSize 넘김! 바로 아래 삭제참고!
 			model.addAttribute("url", "board/boardInput");
+		}
+		else if(msgFlag.equals("boardDeleteOk")) {
+			model.addAttribute("msg", "게시글이 삭제되었습니다.");
+			// flag로 pag, pageSize 넘겨줌
+			model.addAttribute("url", "board/boardList"+flag);
+		}
+		else if(msgFlag.equals("boardUpdateOk")) {
+			model.addAttribute("msg", "게시글이 수정되었습니다.");
+			model.addAttribute("url", "board/boardList"+flag);
 		}
 		
 		

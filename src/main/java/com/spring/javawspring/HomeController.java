@@ -65,7 +65,10 @@ public class HomeController {
 		
 		// CKEditor에서 올린(전송) 파일을 서버 파일시스템에 실제 저장할 경로 설정 => realPath ($ {ctp} 경로 XXX)
 		// String realPath = request.getRealPath(oFileName);
-		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/board/");
+		
+		// 작업폴더로 경로 수정 (실제 저장은 board)
+		// String realPath = request.getSession().getServletContext().getRealPath("/resources/data/board/");
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/ckeditor/");
 		OutputStream os = new FileOutputStream(new File(realPath + oFileName));
 		os.write(bytes);
 		// 위 까지가 파일 업로드 완료 (multipartfile, request 객체 이용)
@@ -73,7 +76,9 @@ public class HomeController {
 		/* 서버 파일시스템에 저장된 파일을 브라우저 편집 화면에 보여주기 위한 작업 -> response 객체 이용 */
 		PrintWriter out = response.getWriter(); 
 		// 아래의 경로는 / = contextPath(ctp)부터 시작되는 경로 작성 (서버에 저장된 url 경로)
-		String fileUrl = request.getContextPath() + "/board/" + oFileName;
+		
+		// String fileUrl = request.getContextPath() + "/board/" + oFileName;
+		String fileUrl = request.getContextPath() + "/data/ckeditor/" + oFileName;
 		// Jason 형식 작성 (key 값 작성 시 다음과 같은 양식으로 작성 {"key1":"value1", "key2":"value2"})
 		// uploaded(예약어) : 업로드 하는 거니? (1 = true)
 		// "" 안에 작성하면 문자로 보므로, \"\" 지우고 1 작성!

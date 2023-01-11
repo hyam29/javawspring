@@ -34,7 +34,8 @@
 <jsp:include page="/WEB-INF/views/include/slide2.jsp" />
 <p><br/></p>
 <div class="container">
-	<h2 class="text-center">* 게 시 판 리 스 트 *</h2>
+	<c:if test="${empty searchString}"><h2 class="text-center">* 게 시 판 리 스 트 *</h2></c:if>
+  <c:if test="${!empty searchString}"><h2 class="text-center"><font color='blue'><b>${searchString}</b></font> 검색 리스트 (총<font color='red'>${pageVo.totRecCnt}</font>건)</h2></c:if>
 	<br/>
 	<table class="table table-borderless">
 		<tr>
@@ -86,24 +87,24 @@
 <div class="text-center">
   <ul class="pagination justify-content-center">
     <c:if test="${pageVo.pag > 1}">
-      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=1">첫페이지</a></li>
+      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=1&search=${search}&searchString=${searchString}">첫페이지</a></li>
     </c:if>
     <c:if test="${pageVo.curBlock > 0}">
-      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${(pageVo.curBlock-1)*pageVo.blockSize + 1}">이전블록</a></li>
+      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${(pageVo.curBlock-1)*pageVo.blockSize + 1}&search=${search}&searchString=${searchString}">이전블록</a></li>
     </c:if>
     <c:forEach var="i" begin="${(pageVo.curBlock)*pageVo.blockSize + 1}" end="${(pageVo.curBlock)*pageVo.blockSize + pageVo.blockSize}" varStatus="st">
       <c:if test="${i <= pageVo.totPage && i == pageVo.pag}">
-    		<li class="page-item active"><a class="page-link bg-secondary border-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${i}">${i}</a></li>
+    		<li class="page-item active"><a class="page-link bg-secondary border-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${i}&search=${search}&searchString=${searchString}">${i}</a></li>
     	</c:if>
       <c:if test="${i <= pageVo.totPage && i != pageVo.pag}">
-    		<li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${i}">${i}</a></li>
+    		<li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${i}&search=${search}&searchString=${searchString}">${i}</a></li>
     	</c:if>
     </c:forEach>
     <c:if test="${pageVo.curBlock < pageVo.lastBlock}">
-      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${(pageVo.curBlock+1)*pageVo.blockSize + 1}">다음블록</a></li>
+      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${(pageVo.curBlock+1)*pageVo.blockSize + 1}&search=${search}&searchString=${searchString}">다음블록</a></li>
     </c:if>
     <c:if test="${pageVo.pag < pageVo.totPage}">
-      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${pageVo.totPage}">마지막페이지</a></li>
+      <li class="page-item"><a class="page-link text-secondary" href="${ctp}/board/boardList?pageSize=${pageVo.pageSize}&pag=${pageVo.totPage}&search=${search}&searchString=${searchString}">마지막페이지</a></li>
     </c:if>
   </ul>
 </div>
@@ -113,10 +114,10 @@
 <div class="container text-center">
 	<form name="searchForm">
 		<b>검색 </b>
-		<select name="part" id="part" class="m-2">
-			<option value="title">글제목</option>
-			<option value="nickName">글쓴이</option>
-			<option value="content">글내용</option>
+		<select name="search" id="search" class="m-2">
+			<option value="title" ${search == "title" ? "selected" : ""}>글제목</option>
+			<option value="nickName" ${search == "nickName" ? "selected" : ""}>글쓴이</option>
+			<option value="content" <c:if test="${search == 'content'}">selected</c:if>>글내용</option>
 		</select>
 			<input type="text" name="searchString" id="searchString" />
 			<input type="button" value="검색" onclick="searchCheck()" class="btn btn-outline-secondary btn-sm" />
