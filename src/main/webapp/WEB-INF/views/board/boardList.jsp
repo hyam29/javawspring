@@ -59,6 +59,8 @@
 	  	for(let i=0; i<myform.chk.length; i++) {
 	  		if(myform.chk[i].checked == true) delItems += myform.chk[i].value + "/";
 	  	}
+	  	alert(delItems);
+	  	
 	  	$.ajax({
 	  		type : "post",
 	  		url  : "${ctp}/board/boardSelectDelete",
@@ -73,6 +75,7 @@
 	  			alert("전송오류!!");
 	  		}
 	  	});
+	  	
 	  }
   </script>
 </head>

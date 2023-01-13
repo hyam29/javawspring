@@ -19,5 +19,7 @@ public interface StudyService {
 	public ArrayList<GuestVO> getGuestPart(String part, String mid);
 
 	public int fileUpload(MultipartFile fName);
+
+	public void getCalendar();
 	
 }

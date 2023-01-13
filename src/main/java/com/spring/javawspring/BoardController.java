@@ -1,10 +1,8 @@
 package com.spring.javawspring;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,10 +228,10 @@ public class BoardController {
 	public String boardSelectDeletePost(String delItems) {
 		int res = 0;
 		delItems = delItems.substring(0, delItems.length()-1);
-		System.out.println("delItems : " + delItems);
+		// System.out.println("delItems : " + delItems);
 		
 		String[] delItemsArr = delItems.split("/");
-		System.out.println("delItemsArr[0] : " + delItemsArr[0]);
+		// System.out.println("delItemsArr[0] : " + delItemsArr[0]);
 		
 		for(int i=0; i<delItemsArr.length; i++) {
 			int checkIdx = Integer.parseInt((String)delItemsArr[i]);

@@ -322,4 +322,13 @@ public class StudyController {
 		if(res == 1) return "redirect:/msg/fileUploadOk";
 		else return "redirect:/msg/fileUploadNo";
 	}
+	
+	/* 달력내역 가져오기 */
+	@RequestMapping(value="calendar", method=RequestMethod.GET)
+	public String calendarGet() {
+		studyService.getCalendar();
+		return "study/calendar/calendar";
+	}
+	
+	
 }
