@@ -1,8 +1,10 @@
 package com.spring.javawspring;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.pagination.PageVO;
 import com.spring.javawspring.service.BoardService;
 import com.spring.javawspring.service.MemberService;
+import com.spring.javawspring.vo.BoardReplyVO;
 import com.spring.javawspring.vo.BoardVO;
 import com.spring.javawspring.vo.GoodVO;
 import com.spring.javawspring.vo.MemberVO;
@@ -46,14 +49,10 @@ public class BoardController {
 		PageVO pageVo = pageProcess.totRecCnt(pag, pageSize, "board", search, searchString);
 		List<BoardVO> vos = boardService.getBoardList(pageVo.getStartIdxNo(), pageSize, search, searchString);
 		
-		//PageVO pageVo = pageProcess.totRecCnt(pag, pageSize, "board", "", "");
-		//List<BoardVO> vos = boardService.getBoardList(pageVo.getStartIdxNo(), pageSize);
-		
 		model.addAttribute("pageVo", pageVo);
 		model.addAttribute("vos", vos);
 		model.addAttribute("search", search);
 		model.addAttribute("searchString", searchString);
-		
 		return "board/boardList";
 	}
 	
@@ -134,16 +133,16 @@ public class BoardController {
 		
 		/* DB에서 현재 게시글의 '좋아요' 체크여부 */
 		String mid = (String) session.getAttribute("sMid");
-		//GoodVO goodVo = boardService.getBoardGoodCheck(idx, "board", mid);
-		
-		//model.addAttribute("goodVo", goodVo);
+		GoodVO goodVo = boardService.getBoardGoodCheck(idx, "board", mid);
+		model.addAttribute("goodVo", goodVo);
 		
 		/* 이전글/다음글 가져오기 */
 		ArrayList<BoardVO> pnVos = boardService.getPrevNext(idx);
-		
-		//System.out.println("pnVos : " + pnVos);
-		
 		model.addAttribute("pnVos", pnVos);
+		
+		/* 댓글 가져오기(replyVos) */
+		List<BoardReplyVO> replyVos = boardService.getBoardReply(idx);
+		model.addAttribute("replyVos", replyVos);
 		
 		return "board/boardContent";
 	}
@@ -194,7 +193,23 @@ public class BoardController {
 		return res;
 	}
 	
-	/* 게시판 글 삭제 처리 */
+
+	/* 좋아요 토글 처리(DB를 활용한 예제) */
+	@ResponseBody
+	@RequestMapping(value = "/boardGoodDBCheck", method=RequestMethod.POST)
+	public void boardGoodDBCheckPost(GoodVO goodVo) {
+		// 처음 '좋아요'클릭시는 무조건 레코드를 생성, 그렇지 않으면, 즉 기존에 '좋아요'레코드가 있었다면 '해당레코드를 삭제' 처리한다.
+		if(goodVo.getIdx() == 0) {
+			boardService.setGoodDBInput(goodVo);
+			boardService.setGoodUpdate(goodVo.getPartIdx(), 1);
+		}
+		else {
+			boardService.setGoodDBDelete(goodVo.getIdx());
+			boardService.setGoodUpdate(goodVo.getPartIdx(), -1);
+		}
+	}
+	
+	/* (사용자) 게시판 글 삭제 처리 */
 	@RequestMapping(value = "/boardDeleteOk", method = RequestMethod.GET)
 	public String boardDeleteOkGet(Model model, int idx, int pag, int pageSize) {
 		// 게시글에 사진이 존재한다면, 서버에 있는 사진 파일을 먼저 삭제 처리
@@ -207,6 +222,26 @@ public class BoardController {
 		model.addAttribute("flag", "?pag="+pag+"&pageSize="+pageSize);
 		
 		return "redirect:/msg/boardDeleteOk";
+	}
+	
+	/* (관리자) 게시판 선택 삭제 */
+	@ResponseBody
+	@RequestMapping(value="/boardSelectDelete", method=RequestMethod.POST)
+	public String boardSelectDeletePost(String delItems) {
+		int res = 0;
+		delItems = delItems.substring(0, delItems.length()-1);
+		System.out.println("delItems : " + delItems);
+		
+		String[] delItemsArr = delItems.split("/");
+		System.out.println("delItemsArr[0] : " + delItemsArr[0]);
+		
+		for(int i=0; i<delItemsArr.length; i++) {
+			int checkIdx = Integer.parseInt((String)delItemsArr[i]);
+			res = boardService.setBoardSelectDelete(checkIdx);
+		}
+		
+		
+		return res+"";
 	}
 	
 	/* 게시판 글 수정 폼 */
@@ -242,17 +277,54 @@ public class BoardController {
 			
 			// 파일 업로드 처리가 완료되면 다시 경로 수정 ('/ckeditor/' 경로이므로 -> '/ckeditor/board/') (즉, 변경된 vo.getContent -> vo.setContent() 처리)
 			vo.setContent(vo.getContent().replace("/data/ckeditor/", "/data/ckeditor/board/"));
-			
 		}
-		
 		// 정비된 VO를 DB에 Update 시켜준다.
 		boardService.setBoardUpdateOk(vo);
-		
 		model.addAttribute("flag", "?pag="+pag+"&pageSize="+pageSize);
-		
 		return "redirect:/msg/boardUpdateOk";
 	}
 	
+	/* 댓글 달기 처리 */
+	@ResponseBody
+	@RequestMapping(value = "/boardReplyInput", method=RequestMethod.POST)
+	public String boardReplyInputPost(BoardReplyVO replyVo) {
+		int levelOrder = 0;
+		// String으로 바꿔야 null값 처리 가능해짐
+		String strLevelOrder = boardService.getMaxLevelOrder(replyVo.getBoardIdx());
+		if(strLevelOrder != null) levelOrder = levelOrder + Integer.parseInt(strLevelOrder) + 1;
+		
+		// 부모댓글 levelOrder + 1 처리하여 보이는 순서 변경 처리
+		replyVo.setLevelOrder(levelOrder + 1);
+		boardService.setBoardReplyInput(replyVo);
+		
+		return "1";
+	}
+	
+	/* 댓글 삭제 처리 */
+	@ResponseBody
+	@RequestMapping(value="/boardReplyDeleteOk", method=RequestMethod.POST)
+	public String boardReplyDeleteOkPost(int idx) {
+		boardService.setBoardReplyDeleteOk(idx);
+		return "";
+	}
+	
+	/* 대댓글 달기 처리 */
+	@ResponseBody
+	@RequestMapping(value = "/boardReplyInput2", method=RequestMethod.POST)
+	public String boardReplyInput2Post(BoardReplyVO replyVo) {
+		// 대댓글 등록 전 levelOrder 증가 DB처리
+		boardService.setLevelOrderPlusUpdate(replyVo);
+		
+		// 이전 댓글들 순서 변경을 위해 +1 처리
+		replyVo.setLevel(replyVo.getLevel() + 1);
+		replyVo.setLevelOrder(replyVo.getLevelOrder() + 1);
+		
+		// level이 다르므로, setBoardReplyInput 호출 XXX
+		boardService.setBoardReplyInput2(replyVo);
+		return "";
+	}
+	
+		
 	
 	
 }

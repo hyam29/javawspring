@@ -11,12 +11,14 @@
   <jsp:include page="/WEB-INF/views/include/bs4.jsp" />
   <script>
   	'use strict';
+  	// 건수 체크박스 처리
   	function pageCheck() {
   		let pageSize = document.getElementById("pageSize").value;
 			location.href="${ctp}/board/boardList?pageSize="+pageSize+"&pag=${pageVo.pag}";
 			/*JSP 변수는 따당으로, pag는 담아둔거라 EL표기법으로 작성*/
   	}
   	
+  	// 검색기 처리
   	function searchCheck() {
   		let searchString = $("#searchString").val();
   		if(searchString.trim() == "") {
@@ -27,6 +29,51 @@
   			searchForm.submit();
   		}
   	}
+  	
+		// 전체선택
+	  $(function(){
+	  	$("#checkAll").click(function(){
+	  		if($("#checkAll").prop("checked")) {
+	    		$(".chk").prop("checked", true);
+	  		}
+	  		else {
+	    		$(".chk").prop("checked", false);
+	  		}
+	  	});
+	  });
+	  
+	  // 선택항목 반전
+	  $(function(){
+	  	$("#reverseAll").click(function(){
+	  		$(".chk").prop("checked", function(){
+	  			return !$(this).prop("checked");
+	  		});
+	  	});
+	  });
+	  
+	  // 파일 삭제하기(ajax처리하기)
+	  function selectDelCheck() {
+	  	let ans = confirm("선택된 모든 게시물을 삭제 하시겠습니까?");
+	  	if(!ans) return false;
+	  	let delItems = "";
+	  	for(let i=0; i<myform.chk.length; i++) {
+	  		if(myform.chk[i].checked == true) delItems += myform.chk[i].value + "/";
+	  	}
+	  	$.ajax({
+	  		type : "post",
+	  		url  : "${ctp}/board/boardSelectDelete",
+	  		data : {delItems : delItems},
+	  		success:function(res) {
+	  			if(res == "1") {
+	  				alert("선택된 파일을 삭제처리 하였습니다.");
+	  			  location.reload();
+	  			}
+	  		},
+	  		error  :function() {
+	  			alert("전송오류!!");
+	  		}
+	  	});
+	  }
   </script>
 </head>
 <body>
@@ -53,36 +100,52 @@
 			</td>
 		</tr>
 	</table>
-	<table class="table table-hover text-center">
-		<tr class="table-dark text-dark">
-			<th>글번호</th>
-			<th>글제목</th>
-			<th>글쓴이</th>
-			<th>작성일</th>
-			<th>조회수</th>
-			<th>좋아요</th>
-		</tr>
-		<c:set var="curScrStartNo" value="${pageVo.curScrStartNo}" /> <!-- 넣는 게 정석인데 생략해도 됨 -->
-		<c:forEach var="vo" items="${vos}">
+	<form name="myform">
+		<table class="table table-hover text-center">
+			<c:if test="${sLevel == 0}">
 			<tr>
-				<td>${curScrStartNo}</td>
-				<td class="text-left">
-					<a href="${ctp}/board/boardContent?idx=${vo.idx}&pageSize=${pageVo.pageSize}&pag=${pageVo.pag}">${vo.title}</a>
-					<c:if test="${vo.replyCnt != 0}">(${vo.replyCnt})</c:if>
-					<c:if test="${vo.hour_diff <= 24}"><img src="${ctp}/images/new.gif" /></c:if>
-				</td>
-				<td>${vo.nickName}</td>
-				<%-- <td>${fn:substring(vo.WDate,0,10)}(${vo.day_diff})</td> --%>
-				<%-- <td>${vo.day_diff > 0 ? fn:substring(vo.WDate,0,10) : fn:substring(vo.WDate,11,19)}</td> --%> <!-- 날짜로 비교 -->
-				<td>${vo.hour_diff > 24 ? fn:substring(vo.WDate,0,10) : fn:substring(vo.WDate,11,19)}</td> <!-- 시간도 비교 -->
-				<td>${vo.readNum}</td>
-				<td>${vo.good}</td>
+		    <td colspan="6">
+		      <input type="checkbox" id="checkAll" onclick="checkAllCheck()"/>전체선택/해제 &nbsp;
+		      <input type="checkbox" id="reverseAll" onclick="reverseAllCheck()"/>선택반전 &nbsp;
+		      <input type="button" value="선택항목삭제" onclick="selectDelCheck()" class="btn btn-outline-danger btn-sm"/>
+		    </td>
+	    </tr>
+	    </c:if>
+			<tr class="table-dark text-dark">
+				<c:if test="${sLevel == 0}"><th>선택</th></c:if>
+				<th>글번호</th>
+				<th>글제목</th>
+				<th>글쓴이</th>
+				<th>작성일</th>
+				<th>조회수</th>
+				<th>좋아요</th>
 			</tr>
-			<c:set var="curScrStartNo" value="${curScrStartNo-1}" />
-		</c:forEach>
-		<tr><td colspan="6" class="m-0 p-0"></td></tr>
-	</table>
+			<c:set var="curScrStartNo" value="${pageVo.curScrStartNo}" /> <!-- 넣는 게 정석인데 생략해도 됨 -->
+			<c:forEach var="vo" items="${vos}">
+				<tr>
+					<c:if test="${sLevel == 0}">
+					<td><input type="checkbox" name="chk" class="chk" value="${vo.idx}" /></td>
+					</c:if>
+					<td>${curScrStartNo}</td>
+					<td class="text-left">
+						<a href="${ctp}/board/boardContent?idx=${vo.idx}&pageSize=${pageVo.pageSize}&pag=${pageVo.pag}">${vo.title}</a>
+						<c:if test="${vo.replyCnt != 0}"><span class="badge badge-pill badge-dark">${vo.replyCnt}</span></c:if>
+						<c:if test="${vo.hour_diff <= 24}"><img src="${ctp}/images/new.gif" /></c:if>
+					</td>
+					<td>${vo.nickName}</td>
+					<%-- <td>${fn:substring(vo.WDate,0,10)}(${vo.day_diff})</td> --%>
+					<%-- <td>${vo.day_diff > 0 ? fn:substring(vo.WDate,0,10) : fn:substring(vo.WDate,11,19)}</td> --%> <!-- 날짜로 비교 -->
+					<td>${vo.hour_diff > 24 ? fn:substring(vo.WDate,0,10) : fn:substring(vo.WDate,11,19)}</td> <!-- 시간도 비교 -->
+					<td>${vo.readNum}</td>
+					<td>${vo.good}</td>
+				</tr>
+				<c:set var="curScrStartNo" value="${curScrStartNo-1}" />
+			</c:forEach>
+			<tr><td colspan="6" class="m-0 p-0"></td></tr>
+		</table>
+	</form>
 </div>
+
 <!-- 블록 페이지 시작 -->
 <div class="text-center">
   <ul class="pagination justify-content-center">

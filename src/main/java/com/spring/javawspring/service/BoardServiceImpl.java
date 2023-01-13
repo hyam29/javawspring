@@ -16,6 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.spring.javawspring.dao.BoardDAO;
+import com.spring.javawspring.vo.BoardReplyVO;
 import com.spring.javawspring.vo.BoardVO;
 import com.spring.javawspring.vo.GoodVO;
 
@@ -61,12 +62,7 @@ public class BoardServiceImpl implements BoardService {
 	public ArrayList<BoardVO> getPrevNext(int idx) {
 		return boardDAO.getPrevNext(idx);
 	}
-	/*
-	@Override
-	public List<BoardVO> getBoardList(int startIdxNo, int pageSize) {
-		return boardDAO.getBoardList(startIdxNo, pageSize);
-	}
-	*/
+	
 	@Override
 	public List<BoardVO> getBoardList(int startIdxNo, int pageSize, String search, String searchString) {
 		return boardDAO.getBoardList(startIdxNo, pageSize, search, searchString);
@@ -230,6 +226,60 @@ public class BoardServiceImpl implements BoardService {
 		boardDAO.setBoardUpdateOk(vo);
 		
 	}
+
+	@Override
+	public void setGoodDBInput(GoodVO goodVo) {
+		boardDAO.setGoodDBInput(goodVo);
+		
+	}
+
+	@Override
+	public void setGoodDBDelete(int idx) {
+		boardDAO.setGoodDBDelete(idx);
+		
+	}
+
+	@Override
+	public void setGoodUpdate(int idx, int item) {
+		boardDAO.setGoodUpdate(idx, item);
+		
+	}
+
+	@Override
+	public void setBoardReplyInput(BoardReplyVO replyVo) {
+		boardDAO.setBoardReplyInput(replyVo);
+	}
+
+	@Override
+	public List<BoardReplyVO> getBoardReply(int idx) {
+		return boardDAO.getBoardReply(idx);
+	}
+
+	@Override
+	public void setBoardReplyDeleteOk(int idx) {
+		boardDAO.setBoardReplyDeleteOk(idx);
+	}
+
+	@Override
+	public String getMaxLevelOrder(int boardIdx) {
+		return boardDAO.getMaxLevelOrder(boardIdx);
+	}
+
+	@Override
+	public void setLevelOrderPlusUpdate(BoardReplyVO replyVo) {
+		boardDAO.setLevelOrderPlusUpdate(replyVo);
+	}
+
+	@Override
+	public void setBoardReplyInput2(BoardReplyVO replyVo) {
+		boardDAO.setBoardReplyInput2(replyVo);
+	}
+
+	@Override
+	public int setBoardSelectDelete(int checkIdx) {
+		return boardDAO.setBoardSelectDelete(checkIdx);
+	}
+
 
 
 	

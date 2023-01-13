@@ -48,7 +48,10 @@ public class AdminController {
 	}
 	
 	@RequestMapping(value="/adminContent", method=RequestMethod.GET)
-	public String adminContentGet() {
+	public String adminContentGet(Model model) {
+		/* 한달 신규 가입자 수 */
+		int monthJoin = memberService.getMonthNewUser();
+		model.addAttribute("monthJoin", monthJoin);
 		return "admin/adminContent";
 	}
 	
@@ -99,5 +102,25 @@ public class AdminController {
 		return "admin/file/fileList";
 	}
 	
+	/* 파일관리 선택된 파일 삭제처리하기 */
+	@SuppressWarnings("deprecation")
+	@ResponseBody
+	@RequestMapping(value = "/fileSelectDelete", method = RequestMethod.POST)
+	public String fileSelectDeleteGet(HttpServletRequest request, String delItems) {
+		// System.out.println("delItems : " + delItems);
+		String realPath = request.getRealPath("/resources/data/ckeditor/");
+		delItems = delItems.substring(0, delItems.length()-1);
+		
+		String[] fileNames = delItems.split("/");
+		
+		for(String fileName : fileNames) {
+			String realPathFile = realPath + fileName;
+			new File(realPathFile).delete();
+		}
+		
+		return "1";
+	}
+	
+
 	
 }

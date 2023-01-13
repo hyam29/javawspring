@@ -31,5 +31,7 @@ public interface MemberService {
 
 	public MemberVO getMemberIdSearch(String email);
 
+	public int getMonthNewUser();
+
 
 }

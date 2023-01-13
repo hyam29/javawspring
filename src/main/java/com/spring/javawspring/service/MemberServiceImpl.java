@@ -120,5 +120,10 @@ public class MemberServiceImpl implements MemberService {
 		return memberDAO.getMemberIdSearch(email);
 	}
 
+	@Override
+	public int getMonthNewUser() {
+		return memberDAO.getMonthNewUser();
+	}
+
 	
 }

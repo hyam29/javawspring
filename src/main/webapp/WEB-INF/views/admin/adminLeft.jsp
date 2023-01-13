@@ -8,29 +8,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>adminLeft.jsp</title>
   <jsp:include page="/WEB-INF/views/include/bs4.jsp" />
+  <style>
+    body {
+      font-size: 0.9em;
+    }
+    
+  </style>
+  <script>
+    function logoutCheck() {
+    	parent.location.href = "${ctp}/member/memberLogout";
+    }
+  </script>
 </head>
-<body style="background-color:#cef">
-<p><br/></p>
+<body style="background-color:#ddd">
+<br/>
 <div class="container text-center">
-  <h5>관리자메뉴</h5>
+	<div class="bg-success"><a href="${ctp}/" target="_top" class="btn btn-success btn-sm"> 홈 으 로 </a></div>
+  <h4><a href="${ctp}/admin/adminContent" target="adminContent" class="btn btn-outline-primary btn-sm">관리자메뉴</a></h4>
   <hr/>
-  <p>
-    <a href="${ctp}/" target="_top">홈으로</a>
-  </p>
+  <div class="panel-group text-center table-hover" id="accordion">
+    <div class="panel panel-default bg-light mb-1">
+      <div class="panel-heading bg-secondary text-white pt-1 pb-1">
+        <div class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">커뮤니케이션</a>
+        </div>
+      </div>
+      <div id="collapse4" class="panel-collapse collapse">
+        <div class="panel-body pt-2"><a href="#">방명록리스트</a></div>
+        <div class="panel-body pt-2"><a href="${ctp}/board/boardList" target="adminContent">게시판</a></div>
+        <div class="panel-body pt-2"><a href="${ctp}/" target="adminContent">자료실</a></div>
+      </div>
+    </div>
+    <div class="panel panel-default bg-light mb-1">
+      <div class="panel-heading bg-secondary text-white pt-1 pb-1">
+        <div class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">상품관리</a>
+        </div>
+      </div>
+      <div id="collapse2" class="panel-collapse collapse">
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">상품분류등록</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">상품등록관리</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">상품등록조회</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">옵션등록관리</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">주문관리</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">1:1문의</a></div>
+      </div>
+    </div>
+    <div class="panel panel-default bg-light">
+      <div class="panel-heading bg-secondary text-white pt-1 pb-1">
+        <div class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">기타관리</a>
+        </div>
+      </div>
+      <div id="collapse3" class="panel-collapse collapse">
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/admin/member/adminMemberList" target="adminContent">회원리스트</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">공지사항관리</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/" target="adminContent">사이트분석</a></div>
+        <div class="panel-body pt-2 pb-2"><a href="${ctp}/admin/file/fileList" target="adContent">임시파일관리</a></div>
+      </div>
+    </div>
+  </div>
   <hr/>
-  <p>
-    <a href="#">방명록리스트</a>
-  </p>
+  <div class="bg-danger mb-1"><a href="javascript:logoutCheck()" class="btn btn-danger btn-sm">로그아웃</a></div>
+  
   <hr/>
-  <p>
-    <a href="${ctp}/admin/member/adminMemberList" target="adminContent">회원리스트</a>
-  </p>
+  <h5><a href="${ctp}/admin/adminContent" target="adminContent" class="btn btn-outline-primary btn-sm">관리자메뉴</a></h5>
   <hr/>
-  <b>기타작업</b>
-  <p>
-    <a href="${ctp}/admin/file/fileList" target="adminContent">임시파일관리</a>
-  </p>
 </div>
-<p><br/></p>
 </body>
 </html>

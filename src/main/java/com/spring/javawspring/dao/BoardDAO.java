@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.spring.javawspring.vo.BoardReplyVO;
 import com.spring.javawspring.vo.BoardVO;
 import com.spring.javawspring.vo.GoodVO;
 
@@ -36,7 +37,25 @@ public interface BoardDAO {
 
 	public void setBoardUpdateOk(@Param("vo") BoardVO vo);
 
-	//public int totRecCnt(String part, String searchString);
+	public void setGoodDBInput(@Param("goodVo") GoodVO goodVo);
+
+	public void setGoodDBDelete(@Param("idx") int idx);
+
+	public void setGoodUpdate(@Param("idx") int idx, @Param("item") int item);
+
+	public void setBoardReplyInput(@Param("replyVo") BoardReplyVO replyVo);
+
+	public List<BoardReplyVO> getBoardReply(@Param("idx") int idx);
+
+	public void setBoardReplyDeleteOk(@Param("idx") int idx);
+
+	public String getMaxLevelOrder(@Param("boardIdx") int boardIdx);
+
+	public void setLevelOrderPlusUpdate(@Param("replyVo") BoardReplyVO replyVo);
+
+	public void setBoardReplyInput2(@Param("replyVo") BoardReplyVO replyVo);
+
+	public int setBoardSelectDelete(@Param("idx") int checkIdx);
 
 
 }

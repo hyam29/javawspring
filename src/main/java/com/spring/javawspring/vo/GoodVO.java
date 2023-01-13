@@ -8,5 +8,4 @@ public class GoodVO {
 	private String part;
 	private int partIdx;
 	private String mid;
-	private String goodSw;
 }

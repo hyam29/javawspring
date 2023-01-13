@@ -31,6 +31,8 @@ public interface MemberDAO {
 
 	public MemberVO getMemberIdSearch(@Param("email") String email);
 
+	public int getMonthNewUser();
+
 
 	
 }

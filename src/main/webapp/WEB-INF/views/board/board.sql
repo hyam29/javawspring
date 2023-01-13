@@ -24,11 +24,13 @@ select count(*) from board2 where nickName like '%관리자%';
 create table boardReply2 (
 	idx int not null auto_increment ,		/* 댓글의 고유번호 */
 	boardIdx int not null,							/* 원글의 고유번호(외래키 지정) */
-	nickName varchar(20) not null,			/* 댓쓴이의 닉네임 */
 	mid varchar(20) not null,						/* 댓쓴이의 아이디(닉네임 수정시 필요) */
+	nickName varchar(20) not null,			/* 댓쓴이의 닉네임 */
 	wDate datetime default now(),				/* 댓글 작성일자 */
 	hostIp varchar(50) not null,				/* 댓쓴이의 PC IP */
 	content text not null,							/* 댓글 내용 */
+	level int not null default 0,				/* 댓글 레벨(0:부모댓글(first), 1:대댓글(second), 2 ~~~ */
+	levelOrder int not null default 0,	/* 댓글의 순서(0:부모댓글) 점차 증가 */
 	
 	primary key (idx),
 	foreign key (boardIdx) references board2(idx) /* 외래키 지정 */

@@ -17,6 +17,9 @@
 	<select id="getMemberList" resultType="com.spring.javawspring.vo.MemberVO">
 		select * from member2 <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if> order by idx desc limit #{startIdxNo},#{pageSize};
 	</select>
+	<select id="getMonthNewUser" resultType="int">
+		select count(*) as monthJoin from member2 where startDate between date_add(now(), interval -1 month ) and now();
+	</select>
 	
 	<select id="totTermRecCnt" resultType="int">
 		<!-- 

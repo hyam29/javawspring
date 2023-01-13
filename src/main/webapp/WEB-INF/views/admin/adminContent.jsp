@@ -12,15 +12,36 @@
 <body>
 <p><br/></p>
 <div class="container">
-	<h5>관리자 페이지</h5>
+	<h2>관리자 페이지</h2>
 	<hr/>
 	<p>
-		신규 가입자: 
+		한달 간 신규 가입자: <b>${monthJoin}명</b>
 	</p>
 	<hr/>
-	<p>
+	<div>
 		새로운 글
-	</p>
+		<table class="table table-hover">
+			<tr>
+				<th colspan="3" class="table-dark text-white" width="20%">방명록(Guest)</th>
+				<td>g</td>
+				<td>g</td>
+				<td>g</td>
+			</tr>
+			<tr>
+				<th colspan="3" class="table-dark text-white">게시판(Board)</th>
+				<td>g</td>
+				<td>g</td>
+				<td>g</td>
+			</tr>
+			<tr>
+				<th colspan="3" class="table-dark text-white">자료실(PDS)</th>
+				<td>g</td>
+				<td>g</td>
+				<td>g</td>
+			</tr>
+			<tr><td colspan="6"></td></tr>
+		</table>
+	</div>
 	<hr/>
 	<p>
 		방명록, 게시판 등 만들어둬야 함
