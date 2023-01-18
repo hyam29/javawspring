@@ -8,12 +8,19 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -25,14 +32,19 @@ import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.spring.javawspring.common.DistanceCal;
 import com.spring.javawspring.dao.StudyDAO;
 import com.spring.javawspring.vo.GuestVO;
+import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
 
 @Service
 public class StudyServiceImpl implements StudyService {
 	@Autowired
 	StudyDAO studyDAO;
+	
+	@Autowired
+	JavaMailSender mailSender;
 
 	@Override
 	public String[] getCityStringArr(String dodo) {
@@ -323,8 +335,50 @@ public class StudyServiceImpl implements StudyService {
 			e.printStackTrace();
 		}
 		
+		/* qr 코드 메일 전송 처리 */
+		try {
+			String title = "예약사항을 확인해주세요.";
+			String toMail = moveFlag;
+			String content = "";
+			
+			// mailSender 위에 @Autowired 어노테이션 해둬야 함!
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+			
+			// 메일보관함에 회원이 보내온 메세지들을 모두 저장시킴
+			messageHelper.setTo(toMail); // 위에 변수 선언안하고 여기에 vo.getToMail()로 작성해도 됨.
+			messageHelper.setSubject(title);
+			messageHelper.setText(content);
+			
+			// 전송 시, 내용(content)이 없더라도 그냥 보내짐. 따라서, 정보를 좀 더 추가해서 보내는 것이 좋음!
+			
+			// 메세지 보관함의 내용(content) 편집 후 필요한 정보를 좀 더 추가해서 전송 처리
+			// project때는, 방문하기 주소를 memberLogin으로 보내면 됨!
+			content += "<br><hr><h3>예약번호는 <font coloer='blue'><b>"+strUid+"</b></font>이며, 발행된 qr코드는 다음과 같습니다. <br/>";
+			content += "<p><img src=\"cid:qrCodeName.png\" width='300px' /></p>";
+			content += "<p>방문하기 ▶ <a href='http://49.142.157.251:9090/green2209J_04/'>그린현대미술관</a></p>";
+			// 경로 작은따옴표 안먹을 때 있어서, ""로 작성
+			content += "<p><img src=\"cid:main.png\" width='500px' ></p>";
+			content += "<br><hr><h3><font color='grey'>from. Green Museum<font><h3><hr><br>";
+			// 편집된 content로 보내겠다.
+			messageHelper.setText(content, true);
+
+			// 기재된 그림파일의 경로를 따로 표시처리 한 후 보관함에 다시 저장 (순서 중요)
+			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+			FileSystemResource file = new FileSystemResource(request.getSession().getServletContext().getRealPath("/resources/data/qrCode/"+qrCodeName+".png"));
+			// 그림파일 저장("그림파일명", 객체변수(file))
+			messageHelper.addInline("qrCodeName.png", file);
+			
+			// 메일 전송하기
+			mailSender.send(message);
+			
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
 		return qrCodeName;
 	}
+
+		
 
 	@Override
 	public void setMovieReservation(QrCodeVO vo) {
@@ -336,7 +390,92 @@ public class StudyServiceImpl implements StudyService {
 		return studyDAO.getMovieReservation(idxSearch);
 	}
 
+	/* 선생님꺼 QR코드 */
+	@Override
+	public String qrCreate2(String bigo, String realPath) {
+		String qrCodeName = "";
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		UUID uid = UUID.randomUUID();
+		String idx = uid.toString().substring(0,8);				// 고유번호로 지정한다.
+		qrCodeName = sdf.format(new Date()) + "_" + idx;	// 저장될 파일명
+		
+		try {
+			File file = new File(realPath);
+			if(!file.exists()) file.mkdirs();
+			String moveFlag = new String(bigo.getBytes("UTF-8"), "ISO-8859-1");	// qr코드 생성시에 moveFlag의 내용으로 qr코드가 만들어진다.(DB에 저장시 한글이 깨지기에 전송받은 bigo변수값은 변경시키지 않기위해 새로운 변수로 받았다.)
+			
+			// qr코드 만들기
+			int qrCodeColor = 0xFF000000;			// qr코드 전경색(글자색)
+			int qrCodeBackColor = 0xFFFFFFFF;	// qr코드 배경색
+			
+			QRCodeWriter qrCodeWriter = new QRCodeWriter();	// QR코드 객체 생성(moveFlag에 저장된 정보로 qr코드를 생성한다.)
+			BitMatrix bitMatrix = qrCodeWriter.encode(moveFlag, BarcodeFormat.QR_CODE, 200, 200);		// QR코드저장시 크기(폭/높이) 지정
+			
+			MatrixToImageConfig matrixToImageConfig = new MatrixToImageConfig(qrCodeColor, qrCodeBackColor);
+			BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix, matrixToImageConfig);
+			
+			ImageIO.write(bufferedImage, "png", new File(realPath + qrCodeName + ".png"));
+			
+			// 생성된 QR코드의 정보를 DB에 저장한다.
+			studyDAO.setQrCreateDB(idx, qrCodeName+".png", bigo);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WriterException e) {
+			e.printStackTrace();
+		}
+		
+		return qrCodeName;
+	}
 
+	@Override
+	public QrCodeVO qrCodeSearch(String idx) {
+		return studyDAO.qrCodeSearch(idx);
+	}
+
+	@Override
+	public KakaoAddressVO getKakaoAddressName(String address) {
+		return studyDAO.getKakaoAddressName(address);
+	}
+
+	@Override
+	public void setKakaoAddressName(KakaoAddressVO vo) {
+		studyDAO.setKakaoAddressName(vo);
+	}
+
+	@Override
+	public List<KakaoAddressVO> getAddressNameList() {
+		return studyDAO.getAddressNameList();
+	}
+
+	@Override
+	public void setKakaoAddressDelete(String address) {
+		studyDAO.setKakaoAddressDelete(address);
+	}
+
+	/* 거리 계산 처리 */
+	@Override
+	public List<KakaoAddressVO> getDistanceList() {
+		double centerLat = 36.63514004150315;
+		double centerLongi = 127.45952978085465;
+		
+		// DB에서 LIST 가져오기
+		List<KakaoAddressVO> dbVOS = studyDAO.getkakaoList();
+		
+		// 계산 완료한 값들을 리턴타입으로 돌려보내기 위한 list 생성
+		ArrayList<KakaoAddressVO> vos = new ArrayList<KakaoAddressVO>();
+		
+		// DistanceCal distanceCal = new DistanceCal();
+		
+		for(int i=0; i<dbVOS.size(); i++) {
+			double distance = DistanceCal.distance(centerLat, centerLongi, dbVOS.get(i).getLatitude(), dbVOS.get(i).getLongitude(), "kilometer");
+			if(distance < 15) {
+				vos.add(dbVOS.get(i));
+			}
+		}
+		
+		return vos;
+	}
 	
 	
 }

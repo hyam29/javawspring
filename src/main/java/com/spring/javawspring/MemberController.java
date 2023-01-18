@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.pagination.PageVO;
 import com.spring.javawspring.service.MemberService;
+import com.spring.javawspring.vo.MailVO;
 import com.spring.javawspring.vo.MemberVO;
 
 @Controller
@@ -59,7 +60,7 @@ public class MemberController {
 	
 	/* 카카오 로그인 완료후 수행할 내용들을 기술한다. */
 	@RequestMapping(value="/memberKakaoLogin", method=RequestMethod.GET)
-	public String memberKakaoLoginGet(HttpSession session, HttpServletRequest request, HttpServletResponse response,
+	public String memberKakaoLoginGet(HttpSession session, HttpServletRequest request, HttpServletResponse response, MailVO mailVo,
 			String nickName,
 			String email) {
 		
@@ -75,11 +76,54 @@ public class MemberController {
 			// 임시 비밀번호 발급하기(UUID 8자리로 발급하기로 한다. -> 발급후 암호화시켜 DB에 저장)
 			UUID uid = UUID.randomUUID();
 			String pwd = uid.toString().substring(0,8);
-			session.setAttribute("sImsiPwd", pwd);	// 임시비밀번호를 발급하여 로그인후 변경처리하도록 한다.
-			pwd = passwordEncoder.encode(pwd);
 			
 			// 새로 발급된 임시비밀번호를 메일로 전송처리한다.
-			//  메일 처리부분... 생략함.
+			try {
+				String toMail = email;
+				String title = "GreenMuseum 회원가입을 환영합니다! 임시비밀번호를 발급하오니 확인 후 변경해주세요!";
+				String content = "";
+				
+				// 메일을 전송하기 위한 객체 : MimeMessage(), MimeMessageHelper()(보관함)
+				// mailSender 위에 @Autowired 어노테이션 해둬야 함!
+				MimeMessage message = mailSender.createMimeMessage();
+				MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+				
+				// 메일보관함에 회원이 보내온 메세지들을 모두 저장시킴
+				messageHelper.setTo(toMail); // 위에 변수 선언안하고 여기에 vo.getToMail()로 작성해도 됨.
+				messageHelper.setSubject(title);
+				messageHelper.setText(content);
+				
+				// 전송 시, 내용(content)이 없더라도 그냥 보내짐. 따라서, 정보를 좀 더 추가해서 보내는 것이 좋음!
+				
+				// 메세지 보관함의 내용(content) 편집 후 필요한 정보를 좀 더 추가해서 전송 처리
+				content = content.replace("\n", "<br/>");
+				// HTML4 에서는 <br/> 슬래쉬(/) XXX -> 따라서 / 생략해서 작성
+				content += "<br><hr><h3><font color='grey'>발급된 임시비밀번호는 다음과 같습니다.<font><h3><hr><br>";
+				content += "<br><hr><h3><font color='blue'>"+pwd+"<font><h3><hr><br>";
+				content += "<br><hr><h3><font color='grey'>from. Green Museum<font><h3><hr><br>";
+				// 경로 작은따옴표 안먹을 때 있어서, ""로 작성
+				content += "<p><img src=\"cid:main.png\" width='500px' ></p>";
+				content += "<p>방문하기 ▶ <a href='http://49.142.157.251:9090/green2209J_04/'>그린현대미술관</a></p>";
+				content += "<hr>";
+				// 편집된 content로 보내겠다.
+				messageHelper.setText(content, true);
+				
+				// 기재된 그림파일의 경로를 따로 표시처리 한 후 보관함에 다시 저장 (순서 중요)
+				FileSystemResource file = new FileSystemResource("D:\\JavaWorkspace\\springframework\\works\\javawspring\\src\\main\\webapp\\resources\\images\\main.png");
+				// 그림파일 저장("그림파일명", 객체변수(file))
+				messageHelper.addInline("main.png", file);
+				
+				
+				// 메일 전송하기
+				mailSender.send(message);
+				
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			}
+			
+			// 메일을 보낸 후 임시비밀번호를 인코딩 처리
+			session.setAttribute("sImsiPwd", pwd);	// 임시비밀번호를 발급하여 로그인후 변경처리하도록 한다.
+			pwd = passwordEncoder.encode(pwd);
 			
 			// 자동 회원 가입처리한다.
 			memberService.setKakaoMemberInputOk(mid, pwd, nickName, email);
@@ -399,7 +443,7 @@ public class MemberController {
 			String title = "우리 사이트에서 발급된 임시비밀번호입니다.";
 			
 			// 메일을 전송하기 위한 객체 : MimeMessage(), MimeMessageHelper()(보관함)
-			// mailSender 위에 @Autowired 어노테이션 해둬야 함!
+			// JavaMailSender 위에 @Autowired 어노테이션 해둬야 함!
 			MimeMessage message = mailSender.createMimeMessage();
 			MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 			

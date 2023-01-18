@@ -15,9 +15,40 @@
 		select * from qrCode where idx = #{idxSearch};
 	</select>
 	
+	<!-- 선생님qr코드 -->
+	<select id="qrCodeSearch" resultType="com.spring.javawspring.vo.QrCodeVO">
+  	select * from qrCode where idx = #{idx};
+  </select>
+  
+	<select id="getKakaoAddressName" resultType="com.spring.javawspring.vo.KakaoAddressVO">
+  	select * from kakaoAddress where address = #{address};
+  </select>
+	<select id="getAddressNameList" resultType="com.spring.javawspring.vo.KakaoAddressVO">
+  	select * from kakaoAddress order by address;
+  </select>
+	<select id="getkakaoList" resultType="com.spring.javawspring.vo.KakaoAddressVO">
+  	select * from kakaoAddress;
+  </select>
+  
+  
+	
 	
 	<insert id="setMovieReservation">
 		insert into qrCode values (#{vo.idx}, #{vo.qrCode}, #{vo.bigo});
 	</insert>
+	
+	<!-- 선생님qr코드 -->
+  <insert id="setQrCreateDB">
+    insert into qrCode values (#{idx}, #{qrCode}, #{bigo});
+  </insert>
+  
+  <insert id="setKakaoAddressName">
+    insert into kakaoAddress values (#{vo.address}, #{vo.latitude}, #{vo.longitude});
+  </insert>
+  
+  
+  <delete id="setKakaoAddressDelete">
+  	delete from kakaoAddress where address = #{address};
+  </delete>
 </mapper>
 

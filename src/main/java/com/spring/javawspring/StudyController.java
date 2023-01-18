@@ -30,6 +30,7 @@ import com.spring.javawspring.common.SecurityUtil;
 import com.spring.javawspring.service.MemberService;
 import com.spring.javawspring.service.StudyService;
 import com.spring.javawspring.vo.GuestVO;
+import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.MailVO;
 import com.spring.javawspring.vo.MemberVO;
 import com.spring.javawspring.vo.QrCodeVO;
@@ -344,6 +345,21 @@ public class StudyController {
 		return "study/qrCode/qrCode";
 	}
 	
+	// QR Code 생성하기 (선생님 코드! 원본)
+	/*
+	@ResponseBody
+	@RequestMapping(value = "/qrCode", method = RequestMethod.POST, produces="application/text; charset=utf8")
+	public String qrCodePost(HttpServletRequest request,
+			@RequestParam(name="mid", defaultValue = "", required = false) String mid,
+			@RequestParam(name="moveFlag", defaultValue = "", required = false) String moveFlag) {
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/qrCode/");
+		
+		String qrCodeName = studyService.qrCreate(mid, moveFlag, realPath);
+		
+		return qrCodeName;
+	}
+	*/
+	
 	/* QR Code 생성 */
 	@ResponseBody
 	@RequestMapping(value="/qrCode", method=RequestMethod.POST, produces = "application/text; charset=utf8")
@@ -379,6 +395,116 @@ public class StudyController {
 		}
 	}
 	
+	//QR Code 생성하기2 (선생님)
+	@ResponseBody
+	@RequestMapping(value = "/qrCode2", method = RequestMethod.POST, produces="application/text; charset=utf8")
+	public String qrCode2Post(HttpServletRequest request,
+			@RequestParam(name="moveFlag", defaultValue = "", required = false) String moveFlag) {
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/qrCode/");
+		
+		String qrCodeName = studyService.qrCreate2(moveFlag, realPath);
+		
+		return qrCodeName;
+	}
 	
+	// QR Code 내역 검색하기 (선생님)
+	@ResponseBody
+	@RequestMapping(value = "/qrCodeSearch", method = RequestMethod.POST)
+	public QrCodeVO qrCodeSearchPost(HttpServletRequest request,
+			@RequestParam(name="idx", defaultValue = "", required = false) String idx) {
+		// QrCodeVO vo = studyService.qrCodeSearch(idx);
+		// System.out.println("vo : " + vo);
+		return studyService.qrCodeSearch(idx);
+	}
+	
+	/* 카카오 기본지도 */
+	@RequestMapping(value="/kakaomap/kakaomap", method = RequestMethod.GET)
+	public String kakaomapGet() {
+		return "study/kakaomap/kakaomap";
+	}
+	
+	/* 카카오 '마커표시/DB저장' */
+	@RequestMapping(value="/kakaomap/kakaoEx1", method = RequestMethod.GET)
+	public String kakaoEx1Get() {
+		return "study/kakaomap/kakaoEx1";
+	}
+	
+	/* 카카오 마커표시 DB저장 처리 */
+	@ResponseBody
+	@RequestMapping(value="/kakaomap/kakaoEx1", method = RequestMethod.POST)
+	public String kakaoEx1Post(KakaoAddressVO vo) {
+		KakaoAddressVO searchVo = studyService.getKakaoAddressName(vo.getAddress());
+		if(searchVo != null) return "0";
+		studyService.setKakaoAddressName(vo);
+		return "1";
+	}
+	
+	/* 카카오 'DB저장'된 지역 검색 */
+	@RequestMapping(value="/kakaomap/kakaoEx2", method = RequestMethod.GET)
+	public String kakaoEx2Get(Model model,
+			@RequestParam(name="address", defaultValue = "사창사거리", required = false) String address) {
+		KakaoAddressVO vo = studyService.getKakaoAddressName(address);
+		List<KakaoAddressVO> vos = studyService.getAddressNameList();
+		
+		model.addAttribute("vo", vo);
+		model.addAttribute("vos", vos);
+		model.addAttribute("address", address);
+		return "study/kakaomap/kakaoEx2";
+	}
+	
+	/* 카카오 'DB저장'된 지역의 삭제 */
+	@ResponseBody
+	@RequestMapping(value="/kakaomap/kakaoEx2Delete", method = RequestMethod.POST)
+	public String kakaoEx2DeletePost(String address) {
+		studyService.setKakaoAddressDelete(address);
+		
+		return "";
+	}
+	
+	/* 카카오 'DB저장'된 지역 검색 */
+	@RequestMapping(value="/kakaomap/kakaoEx3", method = RequestMethod.GET)
+	public String kakaoEx3Get(Model model,
+			@RequestParam(name="address", defaultValue = "사창사거리", required = false) String address) {
+		KakaoAddressVO vo = studyService.getKakaoAddressName(address);
+		List<KakaoAddressVO> vos = studyService.getAddressNameList();
+		
+		model.addAttribute("vo", vo);
+		model.addAttribute("vos", vos);
+		model.addAttribute("address", address);
+		return "study/kakaomap/kakaoEx3";
+	}
+	
+	/* 카카오 마커표시 DB저장 처리 */
+	@ResponseBody
+	@RequestMapping(value="/kakaomap/kakaoEx3", method = RequestMethod.POST)
+	public String kakaoEx3Post(KakaoAddressVO vo) {
+		KakaoAddressVO searchVo = studyService.getKakaoAddressName(vo.getAddress());
+		if(searchVo != null) return "0";
+		studyService.setKakaoAddressName(vo);
+		return "1";
+	}
+	
+	/* 카카오 거리계산(Ex4) 뷰 */
+	@RequestMapping(value="/kakaomap/kakaoEx4", method = RequestMethod.GET)
+	public String kakaoEx4Get(Model model,
+		@RequestParam(name="address", defaultValue = "사창사거리", required = false) String address) {
+			KakaoAddressVO vo = studyService.getKakaoAddressName(address);
+			List<KakaoAddressVO> vos = studyService.getAddressNameList();
+			
+			model.addAttribute("vo", vo);
+			model.addAttribute("vos", vos);
+			model.addAttribute("address", address);
+			
+			return "study/kakaomap/kakaoEx4";
+	}
+	
+	/* 카카오 거리계산(Ex5) 뷰 */
+	@RequestMapping(value="/kakaomap/kakaoEx5", method = RequestMethod.GET)
+	public String kakaoEx5Get(Model model) {
+		List<KakaoAddressVO> vos = studyService.getDistanceList();
+		
+		model.addAttribute("vos", vos);
+		return "study/kakaomap/kakaoEx5";
+	}
 	
 }
