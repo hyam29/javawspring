@@ -18,6 +18,8 @@ create table board2 (
 
 
 select count(*) from board2 where nickName like '%관리자%';
+delete from board2 where idx = 2;
+ALTER TABLE feed ADD CONSTRAINT FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE;
 
 
 /* 게시판에 댓글 달기 (해당 게시글의 idx의 댓글이기때문에 외래키 지정 필요) */

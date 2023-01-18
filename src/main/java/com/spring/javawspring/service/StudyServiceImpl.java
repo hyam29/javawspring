@@ -1,11 +1,16 @@
 package com.spring.javawspring.service;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +19,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageConfig;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.spring.javawspring.dao.StudyDAO;
 import com.spring.javawspring.vo.GuestVO;
+import com.spring.javawspring.vo.QrCodeVO;
 
 @Service
 public class StudyServiceImpl implements StudyService {
@@ -262,6 +274,69 @@ public class StudyServiceImpl implements StudyService {
 		request.setAttribute("preLastDay", preLastDay);				// 이전달의 마지막일자를 기억하고 있는 변수
 		request.setAttribute("nextStartWeek", nextStartWeek);	// 다음달의 1일에 해당하는 요일을 기억하고있는 변수
 	}
+
+	/* QR 코드 생성 처리 */
+	@Override
+	public String qrCreate(String mid, String moveFlag, String realPath) {
+		String qrCodeName = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+		UUID uid = UUID.randomUUID();
+		// String strUid = uid.toString().substring(0,2);
+		String strUid = uid.toString().substring(0,8);
+		
+		qrCodeName = sdf.format(new Date()) + "_" + mid + "_" + moveFlag + "_" + strUid;
+		
+		try {
+			// 껍데기 생성(폴더)
+			File file = new File(realPath);
+			// exists() : 있어? 없어? -> mkdirs() : 없으면 만들어줘! (makeDirectorys) (mkdirs 아래아래 계속 만드는 것)
+			if(!file.exists()) file.mkdirs();
+			
+			String codeFlag = new String(moveFlag.getBytes("UTF-8"), "ISO-8859-1") + "_" +strUid;
+			
+			/* QR코드 생성 */
+			
+			// QR코드 색상 정하기 (전경색(글자색), 배경색)
+			// 0x : 16진수로 작성하겠다. (8진수는 0만 작성)
+			// FF : 이 뒤 문자인식
+			// 000000 : 검정색, FFFFFF : 흰색
+			int qrCodeColor = 0xFF000000;
+			int qrCodeBackColor = 0xFFFFFFFF;
+			
+			// QR코드 객체 생성 (google의 zxing 라이브러리 없으면 생성 안됨)
+			QRCodeWriter qrCodeWriter = new QRCodeWriter();
+			//
+			// BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeName 써도 됨, null로 해도 되지만 더 다양한 표현을 위해 null 사용X, 세로길이, 가로길이);
+			// BitMatrix bitMatrix = qrCodeWriter.encode(codeFlag, BarcodeFormat.QR_CODE, qrCodeColor, qrCodeBackColor);
+			BitMatrix bitMatrix = qrCodeWriter.encode(codeFlag, BarcodeFormat.QR_CODE, 200, 200);
+			
+			MatrixToImageConfig matrixToImageConfig = new MatrixToImageConfig(qrCodeColor, qrCodeBackColor);
+			BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix,matrixToImageConfig);
+			
+			ImageIO.write(bufferedImage, "png", new File(realPath + qrCodeName + ".png"));
+			
+			
+			// 예외처리 두개 두지 말고 그냥 Exception으로 하나로 합쳐도 됨
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WriterException e) {
+			e.printStackTrace();
+		}
+		
+		return qrCodeName;
+	}
+
+	@Override
+	public void setMovieReservation(QrCodeVO vo) {
+		studyDAO.setMovieReservation(vo);
+	}
+
+	@Override
+	public QrCodeVO getMovieReservation(String idxSearch) {
+		return studyDAO.getMovieReservation(idxSearch);
+	}
+
+
 	
 	
 }

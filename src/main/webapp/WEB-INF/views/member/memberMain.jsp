@@ -19,6 +19,13 @@
 	<div id="memberInfo1" class="mr-5">
 		<p><font color="salmon"><b>${sNickName}</b></font>님 반갑습니다!</p>
 		<p>현재 회원님의 등급은 "<font color="lightsalmon"><b>${sStrLevel}</b></font>" 입니다.</p>
+		<c:if test="${!empty sImsiPwd}">
+		  <hr/>
+		  현재 임시비밀번호를 발급하여 메일로 전송처리 하였습니다.<br/>
+		  개인정보를 확인하시고 필수입력사항을 기재해 주세요.<br/>
+		  <a href="${ctp}/member/memberPwdUpdate" class="btn btn-outline-secondary">비밀번호변경으로이동하기</a>
+		  <hr/>
+	  </c:if>
 		<!-- 아래 4개 DB에서 찾아서 커맨드객체에서 session에 담아서 여기에 뿌려줌 -->
 		<p>회원님의 보유 포인트 : ${vo.point}</p>
 		<p>최종 접속일 : ${fn:substring(vo.lastDate,0,16)}</p>

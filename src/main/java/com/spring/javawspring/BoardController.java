@@ -233,6 +233,7 @@ public class BoardController {
 		String[] delItemsArr = delItems.split("/");
 		// System.out.println("delItemsArr[0] : " + delItemsArr[0]);
 		
+		
 		for(int i=0; i<delItemsArr.length; i++) {
 			int checkIdx = Integer.parseInt((String)delItemsArr[i]);
 			res = boardService.setBoardSelectDelete(checkIdx);

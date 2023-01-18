@@ -43,13 +43,25 @@
 		-->
 		select * from member2 <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if> order by idx desc limit #{startIdxNo}, #{pageSize};
 	</select>
+	  
+  <select id="getMemberNickNameEmailCheck" resultType="com.spring.javawspring.vo.MemberVO">
+  	select * from member2 where nickName = #{nickName} and email = #{email};
+  </select>
 	
 	
 	<insert id="setMemberJoinOk">
 		insert into member2 values (default, #{vo.mid}, #{vo.pwd}, #{vo.nickName}, #{vo.name}, #{vo.gender}, #{vo.birthday}, #{vo.tel}, #{vo.address}, #{vo.email}, #{vo.homePage}, #{vo.job}, #{vo.hobby}, #{vo.photo}, #{vo.content}, #{vo.userInfor}, default, default, default, default, default, default, default);
 	</insert>
+  <insert id="setKakaoMemberInputOk">
+  	insert into member2 values (default,#{mid},#{pwd},#{nickName},'','남자',now(),'010- - ','/ / / /',#{email},'http://','기타','기타',default,'',default,default,default,default,default,default,default,default);
+  </insert>
 	
 	
+  <!-- 
+  <update id="setTodayCntUpdate">
+  	update member2 set todayCnt = 0 where mid = #{mid};
+  </update>
+   -->
 	<update id="setMemTotalUpdate">
 		update member2 set lastDate=now(), todayCnt=#{todayCnt}, visitCnt=visitCnt+1, point=#{nowTodayPoint} where mid = #{mid};
 	</update>
@@ -59,6 +71,18 @@
 	<update id="setMemberPwdUpdate">
 		update member2 set pwd = #{pwd} where mid = #{mid};
 	</update>
+	  <update id="setMemberUpdateOk">
+  	update member2 set nickName=#{vo.nickName},name=#{vo.name},gender=#{vo.gender},birthday=#{vo.birthday},tel=#{vo.tel},address=#{vo.address},email=#{vo.email},homePage=#{vo.homePage},job=#{vo.job},hobby=#{vo.hobby},photo=#{vo.photo},content=#{vo.content} where mid=#{vo.mid};
+  </update>
+  
+  <update id="setMemberDeleteOk">
+  	update member2 set userDel='OK' where mid = #{mid};
+  </update>
+  
+  <update id="setMemberUserDelCheck">
+  	update member2 set userDel='NO' where mid = #{mid};
+  </update>
+	
 	
 </mapper>
 

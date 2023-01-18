@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.vo.GuestVO;
+import com.spring.javawspring.vo.QrCodeVO;
 
 public interface StudyService {
 
@@ -21,5 +22,13 @@ public interface StudyService {
 	public int fileUpload(MultipartFile fName);
 
 	public void getCalendar();
+
+	public String qrCreate(String mid, String moveFlag, String realPath);
+
+	public void setMovieReservation(QrCodeVO vo);
+
+	public QrCodeVO getMovieReservation(String idxSearch);
+
+
 	
 }

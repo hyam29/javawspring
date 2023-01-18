@@ -81,7 +81,7 @@
     delete from boardReply2 where idx = #{idx};
   </delete>
   <delete id="setBoardSelectDelete">
-    delete from board2 where idx = #{idx};
+    delete from board2 where idx = #{idx} on delete restrict;
   </delete>
 </mapper>
 

@@ -11,5 +11,13 @@
 	<select id="getGuestPart" resultType="com.spring.javawspring.vo.GuestVO">
 		select * from guest2 where ${part} like concat('%',#{name},'%');
 	</select>
+	<select id="getMovieReservation" resultType="com.spring.javawspring.vo.QrCodeVO">
+		select * from qrCode where idx = #{idxSearch};
+	</select>
+	
+	
+	<insert id="setMovieReservation">
+		insert into qrCode values (#{vo.idx}, #{vo.qrCode}, #{vo.bigo});
+	</insert>
 </mapper>
 

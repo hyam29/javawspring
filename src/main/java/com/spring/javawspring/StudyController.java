@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +32,7 @@ import com.spring.javawspring.service.StudyService;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.MailVO;
 import com.spring.javawspring.vo.MemberVO;
+import com.spring.javawspring.vo.QrCodeVO;
 
 @Controller
 @RequestMapping("/study")
@@ -324,11 +327,58 @@ public class StudyController {
 	}
 	
 	/* 달력내역 가져오기 */
-	@RequestMapping(value="calendar", method=RequestMethod.GET)
+	@RequestMapping(value="/calendar", method=RequestMethod.GET)
 	public String calendarGet() {
 		studyService.getCalendar();
 		return "study/calendar/calendar";
 	}
+	
+	/* QR Code 작성 폼 */
+	@RequestMapping(value="/qrCode", method=RequestMethod.GET)
+	public String qrCodeGet(HttpSession session, Model model) {
+		String mid = (String) session.getAttribute("sMid");
+		MemberVO vo = memberService.getMemberIdCheck(mid);
+		
+		model.addAttribute("vo", vo);
+		
+		return "study/qrCode/qrCode";
+	}
+	
+	/* QR Code 생성 */
+	@ResponseBody
+	@RequestMapping(value="/qrCode", method=RequestMethod.POST, produces = "application/text; charset=utf8")
+	public String qrCodePost(HttpServletRequest request, QrCodeVO vo,
+			@RequestParam(name="mid", defaultValue = "", required = false) String mid, 
+			@RequestParam(name="moveFlag", defaultValue = "", required = false) String moveFlag,
+			String film, String theater, String time, int ticket) {
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/qrCode/");
+		String qrCodeName = studyService.qrCreate(mid, moveFlag, realPath);
+		
+		String bigo = film + " / "+ theater + " / " +  time + " / " + ticket;
+		// System.out.println("bigo : " + bigo);
+		String idx = qrCodeName.substring(qrCodeName.lastIndexOf("_")+1);
+		
+		vo.setIdx(idx);
+		vo.setBigo(bigo);
+		vo.setQrCode(qrCodeName);
+		studyService.setMovieReservation(vo);
+		
+		return qrCodeName;
+	}
+	
+	/* QR 고유번호 예약 조회 처리 */
+	@ResponseBody
+	@RequestMapping(value="/qrSearch", method=RequestMethod.POST, produces = "application/text; charset=utf8")
+	public String qrSearchPost(@RequestParam(name="idxSearch", defaultValue = "", required = false) String idxSearch) {
+		QrCodeVO vo = studyService.getMovieReservation(idxSearch);
+		/* if(vo == null || !idxSearch.equals(vo.getIdx())) { */
+		if(vo == null) return "";
+		else {
+			String bigo = vo.getBigo(); 
+			return bigo;
+		}
+	}
+	
 	
 	
 }
