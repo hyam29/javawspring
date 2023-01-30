@@ -7,6 +7,7 @@ import com.spring.javawspring.dao.BoardDAO;
 import com.spring.javawspring.dao.GuestDAO;
 import com.spring.javawspring.dao.MemberDAO;
 import com.spring.javawspring.dao.PdsDAO;
+import com.spring.javawspring.dao.WebMessageDAO;
 
 @Service
 public class PageProcess {
@@ -22,6 +23,9 @@ public class PageProcess {
 	
 	@Autowired
 	PdsDAO pdsDAO;
+	
+	@Autowired
+	WebMessageDAO webMessageDAO;
 
 	// 3번째 매개변수는 게시판 별로 사용할 것이므로 section 이라는 변수명으로 둠 (마음대로 해도 됨)
 	// 4번째 매개변수 부터는 마음대로! (여기서는 part, searchString)
@@ -43,6 +47,11 @@ public class PageProcess {
 		}
 		else if(section.equals("pds")) {
 			totRecCnt = pdsDAO.totRecCnt(part);
+		}
+		else if(section.equals("webMessage")) {
+			String mid = part;
+			int mSw = Integer.parseInt(searchString);
+			totRecCnt = webMessageDAO.totRecCnt(mid, mSw);
 		}
 		
 		

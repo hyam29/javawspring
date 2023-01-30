@@ -22,6 +22,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,7 @@ import com.spring.javawspring.dao.StudyDAO;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
+import com.spring.javawspring.vo.TransactionVO;
 
 @Service
 public class StudyServiceImpl implements StudyService {
@@ -475,6 +477,30 @@ public class StudyServiceImpl implements StudyService {
 		}
 		
 		return vos;
+	}
+
+	@Override
+	public void setTransInput1(TransactionVO vo) {
+		studyDAO.setTransInput1(vo);
+	}
+
+	@Override
+	public void setTransInput2(TransactionVO vo) {
+		studyDAO.setTransInput2(vo);
+		
+	}
+
+	@Override
+	public List<TransactionVO> setTransList() {
+		return studyDAO.setTransList();
+	}
+
+	/* 많이 사용되는 트랜잭션 위치 */
+	@Transactional
+	@Override
+	public void setTransInput(TransactionVO vo) {
+		studyDAO.setTransInput(vo);
+		
 	}
 	
 	

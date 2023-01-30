@@ -14,13 +14,11 @@
   <script src="${ctp}/js/woo.js"></script>
   <script>
 	  'use strict';
-	  let idCheckSw = 0;
 	  let nickCheckSw = 0;
 	  
 	  // 회원가입폼 체크 후 서버 전송(submit) -> 프론트 유효성 검사
     function fCheck() {
     	// 폼의 유효성 검사
-    	let regMid = /^[a-z0-9_]{4,20}$/;
       // let regPwd = /(?=.*[a-zA-Z])(?=.*?[#?!@$%^&*-]).{4,24}/;
       let regNickName = /^[가-힣]+$/;
       let regName = /^[가-힣a-zA-Z]+$/;
@@ -51,12 +49,7 @@
     	
     	
     	// 유효성 검사체크처리한다.(필수 입력필드는 꼭 처리해야 한다.)
-    	if(!regMid.test(mid)) {
-        alert("아이디는 영문 소문자와 숫자, 언더바(_)만 사용가능합니다.(길이는 4~20자리까지 허용)");
-        myform.mid.focus();
-        return false;
-      }
-      else if(!regNickName.test(nickName)) {
+      if(!regNickName.test(nickName)) {
         alert("닉네임은 한글만 사용가능합니다.");
         myform.nickName.focus();
         return false;
@@ -132,11 +125,7 @@
     	
   		// 전송전에 모든 체크가 끝나서 submitFlag가 1이되면 서버로 전송한다.
     	if(submitFlag == 1) {
-    		if(idCheckSw == 0) {
-    			alert("아이디 중복체크버튼을 눌러주세요!");
-    			document.getElementById("midBtn").focus();
-    		}
-    		else if(nickCheckSw == 0) {
+    		if(nickCheckSw == 0) {
     			alert("닉네임 중복체크버튼을 눌러주세요!");
     			document.getElementById("nickNameBtn").focus();
     		}
@@ -151,36 +140,6 @@
     	else {
     		alert("회원 수정 실패");
     	}
-    }
-	  
-	  
-	  // id 중복체크
-    function idCheck() {
-    	let mid = myform.mid.value;
-    	if(mid.trim() == "" || mid.length<4 || mid.length>=20) {
-    		alert("아이디를 확인하세요!(아이디는 4~20자 이내)");
-    		myform.mid.focus();
-    		return false;
-    	}
-    	
-    	$.ajax({
-    		type  : "post",
-    		url   : "${ctp}/member/memberIdCheck",
-    		data  : {mid : mid},
-    		success:function(res) {
-    			if(res == "1") {
-    				alert("이미 사용중인 아이디 입니다.");
-    				$("#mid").focus();
-    			}
-    			else {
-    				alert("사용 가능한 아이디 입니다.");
-    				idCheckSw = 1;
-    			}
-    		},
-    		error : function() {
-    			alert("ID 전송오류!");
-    		}
-    	});
     }
 	  
  		// 닉네임 중복체크
@@ -220,12 +179,11 @@
 <p><br/></p>
 <div class="container">
 	<form name="myform" method="post" class="was-validated" enctype="multipart/form-data">
-	<!-- <form name="myform" method="post" class="was-validated"> -->
     <h2>* 회원 정보수정 *</h2>
     <br/>
     <div class="form-group">
-      <label for="mid">아이디 &nbsp; &nbsp;<input type="button" value="아이디 중복체크" name="midBtn" id="midBtn" class="btn btn-secondary btn-sm" onclick="idCheck()"/></label>
-      <input type="text" value="${vo.mid}" class="form-control" name="mid" id="mid" placeholder="아이디를 입력하세요." required autofocus/>
+      <label for="mid">아이디</label>
+      <input type="text" value="${sMid}" class="form-control" name="mid" id="mid" readonly />
     </div>
     <div class="form-group">
       <label for="nickName">닉네임 &nbsp; &nbsp;<input type="button" value="닉네임 중복체크" name="nickNameBtn" class="btn btn-secondary btn-sm" onclick="nickCheck()"/></label>
@@ -235,18 +193,18 @@
       <label for="name">성명</label>
       <input type="text" class="form-control" value="${vo.name}" id="name" placeholder="성명을 입력하세요." name="name" required />
     </div>
-    <div class="form-group">
+	  <div class="form-group">
       <label for="email1">Email address</label>
 				<div class="input-group mb-3">
-				  <input type="text" class="form-control" value="${email1}" placeholder="Email을 입력하세요." id="email1" name="email1" required />
+				  <input type="text" value="${email1}" class="form-control" placeholder="Email을 입력하세요." id="email1" name="email1" required />
 				  <div class="input-group-append">
 				    <select name="email2" class="custom-select">
-					    <option value="gmail.com" selected>gmail.com</option>
-					    <option value="daum.net">daum.net</option>
-					    <option value="naver.com">naver.com</option>
-					    <option value="nate.com">nate.com</option>
-					    <option value="hotmail.com">hotmail.com</option>
-					    <option value="yahoo.com">yahoo.com</option>
+					    <option value="gmail.com"   <c:if test="${email2=='gmail.com'}">selected</c:if>>gmail.com</option>
+					    <option value="daum.net"    <c:if test="${email2=='daum.net'}">selected</c:if>>daum.net</option>
+					    <option value="naver.com"   <c:if test="${email2=='naver.com'}">selected</c:if>>naver.com</option>
+					    <option value="nate.com"    <c:if test="${email2=='nate.com'}">selected</c:if>>nate.com</option>
+					    <option value="hotmail.com" <c:if test="${email2=='hotmail.com'}">selected</c:if>>hotmail.com</option>
+					    <option value="yahoo.com"   <c:if test="${email2=='yahoo.com'}">selected</c:if>>yahoo.com</option>
 					  </select>
 				  </div>
 				</div>
@@ -310,7 +268,7 @@
     </div>
     <div class="form-group">
 	    <label for="homepage">Homepage address</label>
-	    <input type="text" class="form-control" name="homePage" value="http://" placeholder="홈페이지를 입력하세요." id="homePage"/>
+	    <input type="text" class="form-control" name="homePage" value="${vo.homePage}" placeholder="홈페이지를 입력하세요." id="homePage"/>
 	  </div>
     <div class="form-group">
       <label for="name">직업</label>

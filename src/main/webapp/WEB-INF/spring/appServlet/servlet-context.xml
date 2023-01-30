@@ -3,9 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
@@ -30,6 +32,8 @@
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 	
+	<!-- 실무에서는, 아래와같이 컨트롤러 패키지를 따로 만들어서 관리하기도 함. 여기부분 잘 확인하기)  -->
+	<!-- <context:component-scan base-package="com.spring.javawspring.controller" /> -->
 	<context:component-scan base-package="com.spring.javawspring" />
 	
 	<!-- BCryptPasswordEncoder 객체를 위한 Bean 등록 -->
@@ -56,24 +60,30 @@
 		</interceptor>
 		
 		<interceptor>
-			<mapping path="/pds/**"/>
+			<mapping path="/pds/pdsInput"/>
+			<!-- <mapping path="/pds/**"/>
 			<exclude-mapping path="/pds/pdsList"/>
 			<exclude-mapping path="/pds/pdsTotalDown"/>
+			<exclude-mapping path="/pds/pdsDownAction"/> -->
 			<beans:ref bean="level2Interceptor" />
 		</interceptor>
 		
 		<interceptor>
 			<mapping path="/study/**"/>
 			<mapping path="/board/**"/>
-			<mapping path="/pds/pdsList"/>
+			<mapping path="/pds/**"/>
+			<!-- <mapping path="/pds/pdsList"/>
 			<mapping path="/pds/pdsTotalDown"/>
+			<mapping path="/pds/pdsDownAction"/> -->
 			<mapping path="/member/memberList"/>
 			<exclude-mapping path="/board/boardList"/>
+			<exclude-mapping path="/pds/pdsInput"/>
 			<beans:ref bean="level3Interceptor" />
 		</interceptor>
 		
 		<interceptor>
 			<mapping path="/member/**"/>
+			<mapping path="/webMessage/**"/>
 			<mapping path="/board/boardList"/>
 			<exclude-mapping path="/member/memberLogin"/>
 			<exclude-mapping path="/member/memberLogout"/>
@@ -86,8 +96,10 @@
 			<exclude-mapping path="/member/memberKakaoLogin"/>
 			<beans:ref bean="level4Interceptor" />
 		</interceptor>
-		
-		
 	</interceptors>
+	
+	<!-- 트랜잭션을 어노테이션으로 처리하기 위해 참조하는 클래스를 등록 -->
+	<!-- root-context.xml 에만 해도 원래는 되지만 안되는 경우가 가끔 있어서, servlet-context에 추가 작성시 100% 작동 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
 	
 </beans:beans>

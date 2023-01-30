@@ -81,6 +81,7 @@ public class PdsServiceImpl implements PdsService {
 		fileName += cal.get(Calendar.HOUR);
 		fileName += cal.get(Calendar.MINUTE);
 		fileName += cal.get(Calendar.SECOND);
+		// millisecond는 생략가능
 		fileName += cal.get(Calendar.MILLISECOND);
 		fileName += "_" + oFileName;
 		

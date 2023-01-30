@@ -39,5 +39,7 @@ public interface MemberService {
 
 	public void setMemberUserDelCheck(String mid);
 
+	public int setMemberUpdate(MultipartFile fName, MemberVO vo, String mid);
+
 
 }

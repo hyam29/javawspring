@@ -101,6 +101,14 @@ public class MessageController {
 			model.addAttribute("msg", "비밀번호가 일치합니다.\\n회원정보 수정 페이지로 이동합니다.");
 			model.addAttribute("url", "member/memberUpdate");
 		}
+		else if(msgFlag.equals("memberUpdateOk")) {
+			model.addAttribute("msg", "회원정보 수정이 완료되었습니다!");
+			model.addAttribute("url", "member/memberMain");
+		}
+		else if(msgFlag.equals("memberUpdateNo")) {
+			model.addAttribute("msg", "회원정보 수정에 실패하였습니다.");
+			model.addAttribute("url", "member/memberUpdate");
+		}
 		else if(msgFlag.equals("fileUploadOk")) {
 			model.addAttribute("msg", "파일이 업로드되었습니다!");
 			model.addAttribute("url", "study/fileUpload/fileUploadForm");
@@ -130,6 +138,18 @@ public class MessageController {
 		else if(msgFlag.equals("pdsInputOk")) {
 			model.addAttribute("msg", "자료실에 파일이 업로드 되었습니다.");
 			model.addAttribute("url", "pds/pdsList");
+		}
+		else if(msgFlag.equals("wmMemberIdNo")) {
+			model.addAttribute("msg", "입력하신 아이디는 없는 회원입니다.");
+			model.addAttribute("url", "webMessage/webMessage?mSw=0");
+		}
+		else if(msgFlag.equals("wmInputOk")) {
+			model.addAttribute("msg", "메세지가 전송되었습니다.");
+			model.addAttribute("url", "webMessage/webMessage?mSw=1");
+		}
+		else if(msgFlag.equals("wmDeleteAll")) {
+			model.addAttribute("msg", "휴지통을 모두 비웠습니다.");
+			model.addAttribute("url", "webMessage/webMessage?mSw=1");
 		}
 		
 		

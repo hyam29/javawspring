@@ -489,8 +489,11 @@ public class MemberController {
 	
 	/* 비밀번호 수정 처리 */
 	@RequestMapping(value="/memberPwdUpdate", method=RequestMethod.POST)
-	public String memberPwdUpdatePost(String mid, String oldPwd, String newPwd) {
+	public String memberPwdUpdatePost(String mid, String oldPwd, String newPwd, HttpSession session) {
 		MemberVO vo = memberService.getMemberIdCheck(mid);
+		// 카카오로그인으로 비밀번호 변경한 사용자는 임시비밀번호 세션을 삭제한다.
+		if(session.getAttribute("sImsiPwd") != null) session.removeAttribute("sImsiPwd");
+		
 		if(!passwordEncoder.matches(oldPwd, vo.getPwd())) {
 			return "redirect:/msg/memberPwdNo";
 		}
@@ -500,7 +503,7 @@ public class MemberController {
 		return "redirect:/msg/memberPwdUpdateOk";
 	}	
 	
-	//아이디 찾기 (과제)
+	/* 아이디 찾기 (과제->완료) */
 	@RequestMapping(value="/memberIdSearch", method=RequestMethod.GET)
 	public String memberIdSearchGet() {
 		return "member/memberIdSearch";
@@ -583,8 +586,50 @@ public class MemberController {
 	public String memberUpdateGet(Model model, HttpSession session) {
 		String mid = (String) session.getAttribute("sMid");
 		MemberVO vo = memberService.getMemberIdCheck(mid);
+		
+		// JSP Form에 출력을 위한 분리작업 처리
+		// email 분리 (@)
+		String[] email = vo.getEmail().split("@");
+		model.addAttribute("email1", email[0]);
+		model.addAttribute("email2", email[1]);
+		
+		// 전화번호 분리 (-)
+		String[] tel = vo.getTel().split("-");
+		if(tel[1].equals(" ")) tel[1] = "";
+		if(tel[2].equals(" ")) tel[2] = "";
+		model.addAttribute("tel1", tel[0]);
+		model.addAttribute("tel2", tel[1]);
+		model.addAttribute("tel3", tel[2]);
+		
+		// 주소 분리 (/)
+		String[] address = vo.getAddress().split("/");
+		if(address[0].equals(" ")) address[0] = "";
+		if(address[1].equals(" ")) address[1] = "";
+		if(address[2].equals(" ")) address[2] = "";
+		if(address[3].equals(" ")) address[3] = "";
+		model.addAttribute("postcode", address[0]);
+		model.addAttribute("roadAddress", address[1]);
+		model.addAttribute("detailAddress", address[2]);
+		model.addAttribute("extraAddress", address[3]);
+		
+		// 취미 분리 (/) => JSP에서 분리할 것임
+		model.addAttribute("hobby", vo.getHobby());
+		
+		// 생일(년-월-일) : 앞에서부터 10자리 만 넘김 (시간 자르기)
+		model.addAttribute("birthday", vo.getBirthday().substring(0, 10));
+		
 		model.addAttribute("vo", vo);
 		return "member/memberUpdate";
+	}
+	
+	@RequestMapping(value="/memberUpdate", method=RequestMethod.POST)
+	public String memberUpdatePost(MultipartFile fName, MemberVO vo, HttpSession session) {
+		String mid = (String) session.getAttribute("sMid");
+		int res = memberService.setMemberUpdate(fName, vo, mid);
+		
+		if(res == 1) return "redirect:/msg/memberUpdateOk";
+		else return "redirect:/msg/memberUpdateNo";
+		
 	}
 	
 	

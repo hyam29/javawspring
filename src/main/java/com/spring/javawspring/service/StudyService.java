@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
+import com.spring.javawspring.vo.TransactionVO;
 
 public interface StudyService {
 
@@ -44,5 +45,13 @@ public interface StudyService {
 	public void setKakaoAddressDelete(String address);
 
 	public List<KakaoAddressVO> getDistanceList();
+
+	public void setTransInput1(TransactionVO vo);
+
+	public void setTransInput2(TransactionVO vo);
+
+	public List<TransactionVO> setTransList();
+
+	public void setTransInput(TransactionVO vo);
 	
 }

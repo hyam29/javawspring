@@ -140,5 +140,29 @@ public class MemberServiceImpl implements MemberService {
 		memberDAO.setMemberUserDelCheck(mid);
 	}
 
+	@Override
+	public int setMemberUpdate(MultipartFile fName, MemberVO vo, String mid) {
+		// 업로드된 사진을 서버 파일시스템에 저장
+		int res = 0;
+		try {
+			String oFileName = fName.getOriginalFilename();
+			if(oFileName == "") {
+				vo.setPhoto("noimage.jpg");
+			}
+			else {
+				UUID uid = UUID.randomUUID();
+				String saveFileName = uid + "_" +oFileName;
+				JavawspringProvide ps = new JavawspringProvide();
+				ps.writeFile(fName, saveFileName, "member");
+				vo.setPhoto(saveFileName);
+			}
+			memberDAO.setMemberUpdate(vo, mid);
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+
 	
 }

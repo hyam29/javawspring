@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javawspring.dao.DbShopDAO">
+	<select id="getCategoryMainOne" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from categoryMain where categoryMainCode = #{categoryMainCode} or categoryMainName = #{categoryMainName};
+	</select>
+	
+	<select id="getCategoryMain" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from categoryMain order by categoryMainCode desc;
+	</select>
+	
+	
+	<select id="getCategoryMiddleOne" resultType="com.spring.javawspring.vo.DbProductVO">
+		<if test="vo.categoryMiddleCode == ''">
+			select * from categoryMiddle where categoryMainCode = #{vo.categoryMainCode}; <!-- 대분류삭제 전 중분류 유무 체크 -->
+		</if>
+		<!-- <if test="categoryMiddleCode != '' or categoryMiddleName != ''"> 배타적 작성을 위해 아래와 같이 작성 원래는 이게 더 정확함 -->
+		<if test="vo.categoryMiddleCode != ''">
+			select *
+			from categoryMiddle
+			where categoryMainCode = #{vo.categoryMainName} and categoryMiddleCode = #{vo.categoryMiddleName} and categoryMiddleName = #{vo.categoryMiddleName}
+		</if>
+	</select>
+	<!-- 
+	<select id="getCategoryMiddleOne" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from categoryMiddle where categoryMainCode = #{vo.categoryMainCode};
+	</select>
+	-->
+	<select id="getCategoryMiddle" resultType="com.spring.javawspring.vo.DbProductVO">
+		select middle.*, main.categoryMainName as categoryMainName
+		from categoryMiddle middle, categoryMain main
+		where middle.categoryMainCode = main.categoryMainCode
+		order by middle.categoryMiddleCode desc;
+	</select>
+	
+	<select id="getCategorySubOne" resultType="com.spring.javawspring.vo.DbProductVO">
+    <if test='vo.categorySubCode eq null or vo.categorySubCode eq ""'>
+  	  select * from categorySub where categoryMiddleCode = #{vo.categoryMiddleCode};
+  	</if>
+    <if test='vo.categorySubCode neq null and vo.categorySubCode neq ""'>
+  	  select * from categorySub 
+  	  where categoryMiddleCode = #{vo.categoryMiddleCode} and 
+  	    (categoryMainCode = #{vo.categoryMainCode} and categoryMiddleCode = #{vo.categoryMiddleCode} and categorySubName = #{vo.categorySubName});
+    </if>
+  </select>
+  
+  <select id="getCategorySub" resultType="com.spring.javawspring.vo.DbProductVO">
+  	select * 
+  	from categorySub sub, categoryMiddle middle, categoryMain main 
+  	where sub.categoryMainCode=main.categoryMainCode and sub.categoryMiddleCode=middle.categoryMiddleCode
+  	order by sub.categorySubCode desc;
+  </select>
+  
+  <select id="getDbProductOne" resultType="com.spring.javawspring.vo.DbProductVO">
+  	select * from dbProduct where substring(productCode,4,3) = #{categorySubCode};  <!-- 상품코드 : A0100125 --> 
+  </select>
+  
+  <select id="getCategoryMiddleName" resultType="com.spring.javawspring.vo.DbProductVO">
+  	select * from categoryMiddle where categoryMainCode = #{categoryMainCode}; 
+  </select>
+	
+	
+	<insert id="setCategoryMainInput">
+		insert into categoryMain values (#{vo.categoryMainCode}, #{vo.categoryMainName});
+	</insert>
+	
+	<insert id="setCategoryMiddleInput">
+		insert into categoryMiddle values (#{vo.categoryMainCode}, #{vo.categoryMiddleCode}, #{vo.categoryMiddleName});
+	</insert>
+	
+	<insert id="setCategorySubInput">
+    insert into categorySub values (#{vo.categoryMainCode}, #{vo.categoryMiddleCode}, #{vo.categorySubCode}, #{vo.categorySubName});
+  </insert>
+  
+	
+	<delete id="setCategoryMainDelete">
+		delete from categoryMain where categoryMainCode = #{categoryMainCode};
+	</delete>
+	
+	 <delete id="setCategoryMiddleDelete">
+    delete from categoryMiddle where categoryMiddleCode = #{categoryMiddleCode};
+  </delete>
+  
+  <delete id="setCategorySubDelete">
+    delete from categorySub where categorySubCode = #{categorySubCode};
+  </delete>
+</mapper>
+

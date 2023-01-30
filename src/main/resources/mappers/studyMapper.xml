@@ -30,6 +30,10 @@
   	select * from kakaoAddress;
   </select>
   
+  <select id="setTransList" resultType="com.spring.javawspring.vo.TransactionVO">
+  	<!-- select u1.*, u2.nickName as nickName, u2.job as job from user u1, user2 u2 where u1.mid=u2.mid order by idx desc; --> 
+		select u1.*, u2.nickName as nickName, u2.job as job from user u1 join user2 u2 on u1.mid=u2.mid order by idx desc;
+  </select>
   
 	
 	
@@ -44,6 +48,20 @@
   
   <insert id="setKakaoAddressName">
     insert into kakaoAddress values (#{vo.address}, #{vo.latitude}, #{vo.longitude});
+  </insert>
+  
+  <insert id="setTransInput1">
+    insert into user values (default, #{vo.mid}, #{vo.name}, #{vo.age}, #{vo.address});
+  </insert>
+  
+  <insert id="setTransInput2">
+    insert into user2 values (#{vo.mid}, #{vo.nickName}, #{vo.job});
+  </insert>
+  
+  <!-- 멀티쿼리(root-context.xml 환경설정 해야 가능) -->
+  <insert id="setTransInput">
+  	insert into user values (default, #{vo.mid}, #{vo.name}, #{vo.age}, #{vo.address});
+    insert into user2 values (#{vo.mid}, #{vo.nickName}, #{vo.job});
   </insert>
   
   

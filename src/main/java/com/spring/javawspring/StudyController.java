@@ -18,6 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,6 +35,7 @@ import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.MailVO;
 import com.spring.javawspring.vo.MemberVO;
 import com.spring.javawspring.vo.QrCodeVO;
+import com.spring.javawspring.vo.TransactionVO;
 
 @Controller
 @RequestMapping("/study")
@@ -505,6 +507,45 @@ public class StudyController {
 		
 		model.addAttribute("vos", vos);
 		return "study/kakaomap/kakaoEx5";
+	}
+
+	/* 트랜잭션 폼 호출 */
+	@RequestMapping(value="/transaction/transaction", method=RequestMethod.GET)
+	public String transactionGet() {
+		return "study/transaction/transaction";
+	}
+	
+	/* 트랜잭션 입력 1번폼 (개별) 처리 */
+	// @Transactional : 트랜잭션 어노테이션 -> 컨트롤러에 작성해도 되지만, 가급적 Service에 작성!
+	@Transactional
+	@RequestMapping(value="/transaction/input1", method=RequestMethod.POST)
+	public String transactionInput1Post(TransactionVO vo) {
+		studyService.setTransInput1(vo);
+		studyService.setTransInput2(vo);
+		
+		return "study/transaction/transaction";
+	}
+	
+	/* 트랜잭션 입력 2번폼 (일괄) 처리 */
+	@RequestMapping(value="/transaction/input2", method=RequestMethod.POST)
+	public String transactionInput2Post(TransactionVO vo) {
+		//studyService.setTransInput1(vo);
+		//studyService.setTransInput2(vo);
+		
+		// 위의 두줄을 아래 한줄로 작성 처리
+		studyService.setTransInput(vo); // user, user2에 등록
+		
+		return "study/transaction/transaction";
+	}
+	
+	
+	// 트랜잭션 리스트
+	@RequestMapping(value = "/transaction/transactionList", method=RequestMethod.GET) // 로케이션으로 왔으므로 GET
+	public String transactionListGet(Model model) {
+		List<TransactionVO> vos = studyService.setTransList();
+		model.addAttribute("vos", vos);
+		
+		return "study/transaction/transactionList";
 	}
 	
 }

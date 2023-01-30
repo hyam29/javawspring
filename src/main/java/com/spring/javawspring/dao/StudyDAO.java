@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
+import com.spring.javawspring.vo.TransactionVO;
 
 public interface StudyDAO {
 
@@ -34,5 +35,13 @@ public interface StudyDAO {
 	void setKakaoAddressDelete(@Param("address") String address);
 
 	List<KakaoAddressVO> getkakaoList();
+
+	void setTransInput1(@Param("vo") TransactionVO vo);
+
+	void setTransInput2(@Param("vo") TransactionVO vo);
+
+	List<TransactionVO> setTransList();
+
+	void setTransInput(@Param("vo") TransactionVO vo);
 
 }

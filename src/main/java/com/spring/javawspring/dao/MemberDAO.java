@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.vo.MemberVO;
 
@@ -38,5 +39,8 @@ public interface MemberDAO {
 	public void setKakaoMemberInputOk(@Param("mid") String mid, @Param("pwd") String pwd, @Param("nickName") String nickName, @Param("email") String email);
 
 	public void setMemberUserDelCheck(@Param("mid") String mid);
+
+	public void setMemberUpdate(@Param("vo") MemberVO vo, @Param("mid") String mid);
+
 	
 }

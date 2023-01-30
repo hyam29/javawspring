@@ -15,9 +15,12 @@
   
     // 카카오 로그인
   	function kakaoLogin() {
+  		//로그인 인증하겠다, 기능을적을거라 중괄호
   		window.Kakao.Auth.login({
-  			scope: 'profile_nickname, account_email',
+  			//동의항목에서 닉네임,이메일 변수
+  			scope: 'profile_nickname, account_email', 
   			success:function(autoObj) {
+				 	//인증과정을거쳐서 토큰값을 보내줌
   				console.log(Kakao.Auth.getAccessToken(),"로그인 OK");
   				console.log(autoObj);
   				window.Kakao.API.request({
@@ -25,10 +28,12 @@
   					success:function(res) {
   						const kakao_account = res.kakao_account;
   						console.log(kakao_account);
-  						//alert(kakao_account.email + " / " + kakao_account.profile.nickname);
+  						// alert(kakao_account.email + " / " + kakao_account.profile.nickname);
+  						// 이메일/닉네임 이렇게나옴
+  						// KakaoLoginOk만드는건(아래처럼하지말고 ok로 바로보내기) 숙제
   						location.href="${ctp}/member/memberKakaoLogin?nickName="+kakao_account.profile.nickname+"&email="+kakao_account.email;
   					}
-  				});
+  				}); // api쓴다고 요청함! -> ajax와 동일
   			}
   		});
   	}
@@ -37,11 +42,13 @@
   	function kakaoLogout(kakaoKey) {
   		// 다음에 로그인시에 동의항목 체크하고 로그인할 수 있도록 로그아웃시키기
   		/*
+  		//연결끊기
 			Kakao.API.request({
 	      url: '/v1/user/unlink',
 	    })
 	    */
   		Kakao.Auth.logout(function() {
+  			//토큰이 null값이면 세션이 끊어진거임
   			console.log(Kakao.Auth.getAccessToken(), "토큰 정보가 없습니다.(로그아웃되셨습니다.)");
   		});
   	}
