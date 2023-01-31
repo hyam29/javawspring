@@ -1,6 +1,15 @@
 package com.spring.javawspring;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.service.DbShopService;
@@ -123,5 +133,77 @@ public class DbShopController {
 	public List<DbProductVO> categoryMiddleNamePost(String categoryMainCode) {
 		return dbShopService.getCategoryMiddleName(categoryMainCode);
 	}
+	
+	/* 상품등록을 위한 폼 */
+	@RequestMapping(value = "/dbProduct", method = RequestMethod.GET)
+	public String dbProductGet(Model model) {
+		// 메인카테고리의 목록리스트 가져오기 위해 카테고리 폼에서 작성된 vos 복사붙여넣기
+		List<DbProductVO> mainVos = dbShopService.getCategoryMain();
+		model.addAttribute("mainVos", mainVos);
+		
+		return "admin/dbShop/dbProduct";
+	}
+	
+	/* 중분류 선택시 소분류항목들 가져오기 */
+	@ResponseBody
+	@RequestMapping(value = "/categorySubName", method = RequestMethod.POST)
+	public List<DbProductVO> categorySubNamePost(String categoryMainCode, String categoryMiddleCode) {
+		
+		return dbShopService.getCategorySubName(categoryMainCode, categoryMiddleCode);
+	}
+	
+	/* 관리자 상품등록 시 ckeditor에 그림을 서버에 올린다면 dbShop폴더에 저장되고, 저장된 파일을 웹브라우저 textarea에 보여줌 */
+	@ResponseBody
+	@RequestMapping("/imageUpload")
+	public void imageUploadGet(HttpServletRequest request, HttpServletResponse response, @RequestParam MultipartFile upload) throws Exception {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("text/html; charset=utf-8");
+		
+		String originalFilename = upload.getOriginalFilename();
+		
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
+		originalFilename = sdf.format(date) + "_" + originalFilename;
+		
+		byte[] bytes = upload.getBytes();
+		
+		String uploadPath = request.getSession().getServletContext().getRealPath("/resources/data/dbShop/");
+		OutputStream outStr = new FileOutputStream(new File(uploadPath + originalFilename));
+		outStr.write(bytes);
+		
+		PrintWriter out = response.getWriter();
+		String fileUrl = request.getContextPath() + "/data/dbShop/" + originalFilename;
+		out.println("{\"originalFilename\":\""+originalFilename+"\",\"uploaded\":1,\"url\":\""+fileUrl+"\"}");
+		
+		out.flush();
+		outStr.close();
+	}
+	
+	/* 상품등록 처리 */
+	// 사진이 하나이므로, MultipartFile 객체 사용 (여러개라면, HttpMultipartFile ...?)
+	@RequestMapping(value = "/dbProduct", method = RequestMethod.POST)
+	public String dbProductPost(MultipartFile file, DbProductVO vo) {
+		// (service에서 처리) 이미지파일 업로드 시 ckeditor폴더에서 product폴더로 복사작업 처리 ('dbShop'폴더에서 -> 'dbShop/product'폴더로)
+		dbShopService.imgCheckProductInput(file, vo);
+		
+		return "redirect:/msg/dbProductInputOk";
+	}
+	
+	/* 등록된 상품 모두 보여주기(관리자화면용) - 상품 소분류명(subTitle)도 함께 출력 */
+	@RequestMapping(value = "/dbShopList", method=RequestMethod.GET)
+	public String dbShopListGet(Model model,
+			@RequestParam(name="part", defaultValue = "전체", required = false) String part) {
+		// 소분류명 가져오기
+		List<DbProductVO> subTitleVos = dbShopService.getSubTitle();
+		model.addAttribute("subTitleVos", subTitleVos);
+		model.addAttribute("part", part);
+		
+		// 전체 상품리스트 가져오기
+		List<DbProductVO> productVos = dbShopService.getDbShopList(part);
+		model.addAttribute("productVos", productVos);
+		
+		return "admin/dbShop/dbShopList";
+	}
+	
 	
 }

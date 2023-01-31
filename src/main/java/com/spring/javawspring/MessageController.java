@@ -151,6 +151,10 @@ public class MessageController {
 			model.addAttribute("msg", "휴지통을 모두 비웠습니다.");
 			model.addAttribute("url", "webMessage/webMessage?mSw=1");
 		}
+		else if(msgFlag.equals("dbProductInputOk")) {
+			model.addAttribute("msg", "상품이 등록되었습니다.");
+			model.addAttribute("url", "dbShop/dbShopList");
+		}
 		
 		
 		return "include/message";

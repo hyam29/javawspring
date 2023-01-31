@@ -60,6 +60,30 @@
   	select * from categoryMiddle where categoryMainCode = #{categoryMainCode}; 
   </select>
 	
+	<select id="getProductMaxIdx" resultType="com.spring.javawspring.vo.DbProductVO">
+		<!-- 자료가 없어서 null이라면, 내림차순 정렬하여 최대값 하나만 보여줌 (오류방지) -->
+		select * from dbProduct order by idx desc limit 1;
+	</select>
+	
+	<select id="getSubTitle" resultType="com.spring.javawspring.vo.DbProductVO">
+		select categorySubName from categorySub group by categorySubName order by categorySubName;
+	</select>
+	
+	<select id="getDbShopList" resultType="com.spring.javawspring.vo.DbProductVO">
+		<if test='part == "전체"'>
+			select * from dbProduct order by idx desc;
+		</if>
+		<if test='part != "전체"'>
+			select product.*, sub.categorySubName from dbProduct where product, categorySub sub 
+			where sub.categorySubName = #{part} and substring(product.productCode,4,3) = sub.categorySubCode order by idx desc;
+		</if>
+	</select>
+	
+	<select id="getCategorySubName" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from categorySub where categoryMainCode = #{categoryMainCode} and categoryMiddleCode = #{categoryMiddleCode};
+	</select>
+	
+	
 	
 	<insert id="setCategoryMainInput">
 		insert into categoryMain values (#{vo.categoryMainCode}, #{vo.categoryMainName});
@@ -73,6 +97,11 @@
     insert into categorySub values (#{vo.categoryMainCode}, #{vo.categoryMiddleCode}, #{vo.categorySubCode}, #{vo.categorySubName});
   </insert>
   
+  <insert id="setDbProductInput">
+  	insert into dbProduct value (#{vo.idx},#{vo.categoryMainCode},#{vo.categoryMiddleCode},#{vo.categorySubCode},#{vo.productCode},#{vo.productName},#{vo.detail},#{vo.mainPrice},#{vo.fSName},#{vo.content});
+  </insert>
+  
+	
 	
 	<delete id="setCategoryMainDelete">
 		delete from categoryMain where categoryMainCode = #{categoryMainCode};

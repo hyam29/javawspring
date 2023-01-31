@@ -43,7 +43,7 @@ create table dbProduct (
 	categoryMainCode char(1) not null,							/* 대분류코드를 외래키로 지정 */ 
 	categoryMiddleCode char(2) not null,						/* 중분류코드를 외래키로 지정 */ 
 	categorySubCode char(3) not null,								/* 소분류코드를 외래키로 지정 */
-	productCode varchar(20) not null,								/* 상품고유코드(대분류코드+중분류코드+소분류코드+고유번호(랜덤)) */
+	productCode varchar(20) not null,								/* 상품고유코드(대분류코드+중분류코드+소분류코드+고유번호(랜덤)) ex) A 05 002 5 */
 	productName varchar(50) not null,								/* 상품명(상품모델명) 세분류 (관리자는 이것만으로 상품 알 수 있음) */
 	detail varchar(100) not null,										/* 상품명으로 소비자는 모르니까 상품의 간단설명(초기화면출력에 필요) */
 	mainPrice int not null,													/* 상품의 기본가격 */

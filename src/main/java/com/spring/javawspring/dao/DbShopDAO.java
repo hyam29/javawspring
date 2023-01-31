@@ -36,6 +36,16 @@ public interface DbShopDAO {
 
 	public List<DbProductVO> getCategoryMiddleName(@Param("categoryMainCode") String categoryMainCode);
 
+	public DbProductVO getProductMaxIdx();
+
+	public void setDbProductInput(@Param("vo") DbProductVO vo);
+
+	public List<DbProductVO> getSubTitle();
+
+	public List<DbProductVO> getDbShopList(@Param("part") String part);
+
+	public List<DbProductVO> getCategorySubName(@Param("categoryMainCode") String categoryMainCode, @Param("categoryMiddleCode") String categoryMiddleCode);
+
 
 
 }
