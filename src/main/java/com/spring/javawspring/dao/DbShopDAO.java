@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbProductVO;
 
 public interface DbShopDAO {
@@ -45,6 +46,22 @@ public interface DbShopDAO {
 	public List<DbProductVO> getDbShopList(@Param("part") String part);
 
 	public List<DbProductVO> getCategorySubName(@Param("categoryMainCode") String categoryMainCode, @Param("categoryMiddleCode") String categoryMiddleCode);
+
+	public DbProductVO getDbShopProduct(@Param("idx") int idx);
+
+	public List<DbOptionVO> getDbShopOption(@Param("productIdx") int productIdx);
+
+	public DbProductVO getProductInfor(@Param("productName") String productName);
+
+	public List<DbProductVO> getCategoryProductName(@Param("categoryMainCode") String categoryMainCode, @Param("categoryMiddleCode") String categoryMiddleCode, @Param("categorySubCode") String categorySubCode);
+
+	public List<DbOptionVO> getOptionList(@Param("productIdx") int productIdx);
+
+	public int getOptionSame(@Param("productIdx") int productIdx, @Param("optionName") String optionName);
+
+	public void setDbOptionInput(@Param("vo") DbOptionVO vo);
+
+	public void setOptionDelete(@Param("idx") int idx);
 
 
 

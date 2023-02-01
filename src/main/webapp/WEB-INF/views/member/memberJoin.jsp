@@ -414,5 +414,6 @@
   </form>
 </div>
 <p><br/></p>
-<jsp:include page="/WEB-INF/views/include/footer.jsp" /></body>
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />
+</body>
 </html>

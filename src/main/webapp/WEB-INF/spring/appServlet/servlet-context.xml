@@ -73,6 +73,7 @@
 			<mapping path="/study/**"/>
 			<mapping path="/board/**"/>
 			<mapping path="/pds/**"/>
+			<mapping path="/dbShop/**"/>
 			<!-- <mapping path="/pds/pdsList"/>
 			<mapping path="/pds/pdsTotalDown"/>
 			<mapping path="/pds/pdsDownAction"/> -->

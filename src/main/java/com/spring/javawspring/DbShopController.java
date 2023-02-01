@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.service.DbShopService;
+import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbProductVO;
 
 @Controller
@@ -152,6 +153,14 @@ public class DbShopController {
 		return dbShopService.getCategorySubName(categoryMainCode, categoryMiddleCode);
 	}
 	
+	/* 소분류 선택시 상품명(모델명) 가져오기 */
+	@ResponseBody
+	@RequestMapping(value = "/categoryProductName", method = RequestMethod.POST)
+	public List<DbProductVO> categoryProductNamePost(String categoryMainCode, String categoryMiddleCode, String categorySubCode) {
+		
+		return dbShopService.getCategoryProductName(categoryMainCode, categoryMiddleCode, categorySubCode);
+	}
+	
 	/* 관리자 상품등록 시 ckeditor에 그림을 서버에 올린다면 dbShop폴더에 저장되고, 저장된 파일을 웹브라우저 textarea에 보여줌 */
 	@ResponseBody
 	@RequestMapping("/imageUpload")
@@ -205,5 +214,100 @@ public class DbShopController {
 		return "admin/dbShop/dbShopList";
 	}
 	
+	/* 관리자에서 진열된 상품을 클릭하였을 경우 해당 상품의 상세내역 보여주기 */
+	@RequestMapping(value = "/dbShopContent", method = RequestMethod.GET)
+	public String dbShopContentGet(Model model, int idx) {
+		// 1건(vo)의 상품 정보 가져오기
+		DbProductVO productVo = dbShopService.getDbShopProduct(idx); 
+		// 모든 옵션(vos) 정보 가져오기 (여기서의 idx는 옵션의 idx XXX, 상품의 idx(productIdx) -> service에서 변수명수정)
+		List<DbOptionVO> optionVos = dbShopService.getDbShopOption(idx);
+		
+		model.addAttribute("productVo", productVo);
+		model.addAttribute("optionVos", optionVos);
+		
+		return "admin/dbShop/dbShopContent";
+	}
+
+	/* 관리자 상품 옵션 등록창 */
+	@RequestMapping(value = "/dbOption", method = RequestMethod.GET)
+	public String dbOptionGet(Model model) {
+		List<DbProductVO> mainVos = dbShopService.getCategoryMain();
+		model.addAttribute("mainVos", mainVos);
+//		String[] productNames = dbShopService.getProductName();
+//		model.addAttribute("productNames", productNames);
+		
+		return "admin/dbShop/dbOption";
+	}
 	
+	/* 옵션등록창에서 상품 선택 시, 선택된 상품의 상세설명 가져오기 */
+	@ResponseBody
+	@RequestMapping(value="/getProductInfor", method = RequestMethod.POST)
+	public DbProductVO getProductInforPost(String productName) {
+		return dbShopService.getProductInfor(productName);
+	}
+	
+	/* 옵션등록창에서 '옵션보기' 버튼 클릭 시, 해당 제품의 모든 옵션 보여주기 */
+	@ResponseBody
+	@RequestMapping(value="/getOptionList", method = RequestMethod.POST)
+	public List<DbOptionVO> getOptionListPost(int productIdx) {
+		// getProductInfor와 동일하므로 아래 작성 안해도 됨
+		return dbShopService.getOptionList(productIdx);
+	}	
+	
+	/* 옵션 기록사항 등록 처리 */
+	@RequestMapping(value="/dbOption", method=RequestMethod.POST)
+	public String dbOptionPost(DbOptionVO vo, String[] optionName, int[] optionPrice) {
+		for(int i=0; i<optionName.length; i++) {
+			// 옵션 등록 시 동일명칭(중복방지) 사용 체크
+			// getOptionSame 생성시 반복문을 돌리므로 optionName은 String 타입의 string 변수명으로 service에 넘어감 -> 수정필요
+			int optionCnt = dbShopService.getOptionSame(vo.getProductIdx(), optionName[i]);
+			
+			if(optionCnt != 0) continue;
+			vo.setProductIdx(vo.getProductIdx());
+			vo.setOptionName(optionName[i]);
+			vo.setOptionPrice(optionPrice[i]);
+			
+			dbShopService.setDbOptionInput(vo);
+		}
+		return "redirect:/msg/dbOptionInputOk";
+	}
+	
+	/* 옵션 삭제 처리 */
+	@ResponseBody
+	@RequestMapping(value="/optionDelete", method = RequestMethod.POST)
+	public String optionDeletePost(int idx) {
+		dbShopService.setOptionDelete(idx);
+		return "";
+	}
+	
+	// 여기까지 관리자
+	/*********************************************************************************************************************************/
+	// 아래로 사용자(고객)
+	
+	/* 등록된 상품 보여주기(사용자(고객)화면에서 보여주기) */
+	@RequestMapping(value="/dbProductList", method = RequestMethod.GET)
+	public String dbProductListGet(
+			@RequestParam(name="part", defaultValue="전체", required=false) String part,
+			Model model) {
+		List<DbProductVO> subTitleVos = dbShopService.getSubTitle();
+		model.addAttribute("subTitleVos", subTitleVos);
+		model.addAttribute("part", part);
+		
+		List<DbProductVO> productVos = dbShopService.getDbShopList(part);
+		model.addAttribute("productVos", productVos);
+		return "dbShop/dbProductList";
+	}
+	
+	/* 진열된 상품클릭 시 해당상품의 상세정보 보여주기 */
+	@RequestMapping(value="/dbProductContent", method=RequestMethod.GET)
+	public String dbProductContentGet(int idx, Model model) {
+		DbProductVO productVo = dbShopService.getDbShopProduct(idx);
+		List<DbOptionVO> optionVos = dbShopService.getDbShopOption(idx);
+		
+		model.addAttribute("productVo", productVo);
+		model.addAttribute("optionVos", optionVos);
+		
+		return "dbShop/dbProductContent";
+	}
+
 }

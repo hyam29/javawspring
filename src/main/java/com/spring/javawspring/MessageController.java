@@ -155,6 +155,10 @@ public class MessageController {
 			model.addAttribute("msg", "상품이 등록되었습니다.");
 			model.addAttribute("url", "dbShop/dbShopList");
 		}
+		else if(msgFlag.equals("dbOptionInputOk")) {
+			model.addAttribute("msg", "상품 옵션이 등록되었습니다.");
+			model.addAttribute("url", "dbShop/dbShopList");
+		}
 		
 		
 		return "include/message";

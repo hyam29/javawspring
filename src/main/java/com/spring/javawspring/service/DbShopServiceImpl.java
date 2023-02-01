@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.dao.DbShopDAO;
+import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbProductVO;
 
 @Service
@@ -212,6 +213,46 @@ public class DbShopServiceImpl implements DbShopService {
 	@Override
 	public List<DbProductVO> getCategorySubName(String categoryMainCode, String categoryMiddleCode) {
 		return dbShopDAO.getCategorySubName(categoryMainCode, categoryMiddleCode);
+	}
+
+	@Override
+	public DbProductVO getDbShopProduct(int idx) {
+		return dbShopDAO.getDbShopProduct(idx);
+	}
+
+	@Override
+	public List<DbOptionVO> getDbShopOption(int productIdx) {
+		return dbShopDAO.getDbShopOption(productIdx);
+	}
+
+	@Override
+	public DbProductVO getProductInfor(String productName) {
+		return dbShopDAO.getProductInfor(productName);
+	}
+
+	@Override
+	public List<DbProductVO> getCategoryProductName(String categoryMainCode, String categoryMiddleCode, String categorySubCode) {
+		return dbShopDAO.getCategoryProductName(categoryMainCode, categoryMiddleCode, categorySubCode);
+	}
+
+	@Override
+	public List<DbOptionVO> getOptionList(int productIdx) {
+		return dbShopDAO.getOptionList(productIdx);
+	}
+
+	@Override
+	public int getOptionSame(int productIdx, String optionName) {
+		return dbShopDAO.getOptionSame(productIdx, optionName);
+	}
+
+	@Override
+	public void setDbOptionInput(DbOptionVO vo) {
+		dbShopDAO.setDbOptionInput(vo);
+	}
+
+	@Override
+	public void setOptionDelete(int idx) {
+		dbShopDAO.setOptionDelete(idx);
 	}
 	
 }

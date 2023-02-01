@@ -83,6 +83,38 @@
 		select * from categorySub where categoryMainCode = #{categoryMainCode} and categoryMiddleCode = #{categoryMiddleCode};
 	</select>
 	
+	<select id="getDbShopProduct" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from dbProduct where idx = #{idx};
+	</select>
+	
+	<select id="getDbShopOption" resultType="com.spring.javawspring.vo.DbOptionVO">
+		select * from dbOption where productIdx = #{productIdx} order by idx;
+	</select>
+	
+	<select id="getProductInfor" resultType="com.spring.javawspring.vo.DbProductVO">
+		select product.*, main.categoryMainName, middle.categoryMiddleName, sub.categorySubName
+  	from dbProduct product, categoryMain main, categoryMiddle middle, categorySub sub
+  	where productName=#{productName} order by idx limit 1;
+	</select>
+		<!-- select product.*, main.categoryMainName, middle.categoryMiddleName, sub.categorySubName 
+		from dbProduct product, categoryMain main, categoryMiddle middle, categorySub sub
+		where productName = #{productName} order by idx limit 1; -->
+	<!-- limit 1 안해주면 error (중복될리는 없지만 작성해줘야 함...?) -->
+	
+	<select id="getCategoryProductName" resultType="com.spring.javawspring.vo.DbProductVO">
+		select * from dbProduct 
+		where categoryMainCode = #{categoryMainCode} and categoryMiddleCode = #{categoryMiddleCode} and categorySubCode = #{categorySubCode};
+	</select>
+	
+	<!-- getDbShopOption과 동일하므로 같이 사용하기 -->
+	<select id="getOptionList" resultType="com.spring.javawspring.vo.DbOptionVO">
+		select * from dbOption where productIdx = #{productIdx} order by optionName;
+	</select>
+	
+	<select id="getOptionSame" resultType="int">
+		select count(*) from dbOption where productIdx = #{productIdx} and optionName = #{optionName};
+	</select>
+	
 	
 	
 	<insert id="setCategoryMainInput">
@@ -101,6 +133,10 @@
   	insert into dbProduct value (#{vo.idx},#{vo.categoryMainCode},#{vo.categoryMiddleCode},#{vo.categorySubCode},#{vo.productCode},#{vo.productName},#{vo.detail},#{vo.mainPrice},#{vo.fSName},#{vo.content});
   </insert>
   
+  <insert id="setDbOptionInput">
+  	insert into dbOption values (default, #{vo.productIdx}, #{vo.optionName}, #{vo.optionPrice});
+  </insert>
+  
 	
 	
 	<delete id="setCategoryMainDelete">
@@ -113,6 +149,10 @@
   
   <delete id="setCategorySubDelete">
     delete from categorySub where categorySubCode = #{categorySubCode};
+  </delete>
+  
+  <delete id="setOptionDelete">
+    delete from dbOption where idx = #{idx};
   </delete>
 </mapper>
 

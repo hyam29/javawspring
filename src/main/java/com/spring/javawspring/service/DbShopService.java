@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbProductVO;
 
 public interface DbShopService {
@@ -43,6 +44,22 @@ public interface DbShopService {
 	public List<DbProductVO> getDbShopList(String part);
 
 	public List<DbProductVO> getCategorySubName(String categoryMainCode, String categoryMiddleCode);
+
+	public DbProductVO getDbShopProduct(int idx);
+
+	public List<DbOptionVO> getDbShopOption(int productIdx);
+
+	public DbProductVO getProductInfor(String productName);
+
+	public List<DbProductVO> getCategoryProductName(String categoryMainCode, String categoryMiddleCode, String categorySubCode);
+
+	public List<DbOptionVO> getOptionList(int productIdx);
+
+	public int getOptionSame(int productIdx, String optionName);
+
+	public void setDbOptionInput(DbOptionVO vo);
+
+	public void setOptionDelete(int idx);
 	
 
 
