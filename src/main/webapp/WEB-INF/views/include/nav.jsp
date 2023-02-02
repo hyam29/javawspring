@@ -40,6 +40,7 @@
 	        <a href="${ctp}/dbShop/dbProductList" class="w3-bar-item w3-button">상품리스트</a>
 	        <a href="${ctp}/dbShop/dbCartList" class="w3-bar-item w3-button">장바구니</a>
 	        <a href="${ctp}/dbShop/dbMyOrder" class="w3-bar-item w3-button">주문(배송)</a>
+	        <a href="${ctp}/study/merchant" class="w3-bar-item w3-button">결제연습</a>
 	        <a href="#" class="w3-bar-item w3-button">QnA(수업x)</a>
 	        <a href="#" class="w3-bar-item w3-button">1:1문의(수업x)</a>
 	      </div>

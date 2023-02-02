@@ -157,7 +157,19 @@ public class MessageController {
 		}
 		else if(msgFlag.equals("dbOptionInputOk")) {
 			model.addAttribute("msg", "상품 옵션이 등록되었습니다.");
-			model.addAttribute("url", "dbShop/dbShopList");
+			model.addAttribute("url", "dbShop/dbOption");
+		}
+		else if(msgFlag.equals("cartOrderOk")) {
+			model.addAttribute("msg", "장바구니에 상품이 등록되었습니다.\\n주문창으로 이동합니다.");
+			model.addAttribute("url", "dbShop/dbCartList");
+		}
+		else if(msgFlag.equals("cartInputOk")) {
+			model.addAttribute("msg", "상품이 장바구니에 등록되었습니다.\\n즐거운 쇼핑 되세요.");
+			model.addAttribute("url", "dbShop/dbProductList");
+		}
+		else if(msgFlag.equals("cartEmpty")) {
+			model.addAttribute("msg", "장바구니가 비어있습니다.");
+			model.addAttribute("url", "dbShop/dbProductList");
 		}
 		
 		

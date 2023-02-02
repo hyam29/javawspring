@@ -34,6 +34,7 @@ import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.MailVO;
 import com.spring.javawspring.vo.MemberVO;
+import com.spring.javawspring.vo.PayMentVO;
 import com.spring.javawspring.vo.QrCodeVO;
 import com.spring.javawspring.vo.TransactionVO;
 
@@ -546,6 +547,31 @@ public class StudyController {
 		model.addAttribute("vos", vos);
 		
 		return "study/transaction/transactionList";
+	}
+	
+	// 결제 연습하기 폼..
+	@RequestMapping(value = "/merchant", method = RequestMethod.GET)
+	public String merchantGet() {
+		return "study/merchant/merchant";
+	}
+	
+	// 결제창 호출하기
+	@RequestMapping(value = "/merchant", method = RequestMethod.POST)
+	public String merchantPost(Model model, HttpSession session, PayMentVO vo) {
+		// 꼭 session에 담아야 함!
+		session.setAttribute("sPayMentVO", vo);
+		// 정보들은 model에 담기
+		model.addAttribute("vo", vo);
+		return "study/merchant/sample";
+	}
+	
+	// 결제창 호출하기
+	@RequestMapping(value = "/merchantOk", method = RequestMethod.GET)
+	public String merchantOkGet(Model model, HttpSession session) {
+		PayMentVO vo = (PayMentVO) session.getAttribute("sPayMentVO");
+		model.addAttribute("vo", vo);
+		session.removeAttribute("sPayMentVO");
+		return "study/merchant/merchantOk";
 	}
 	
 }

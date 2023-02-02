@@ -5,11 +5,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,8 +24,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.pagination.PageProcess;
 import com.spring.javawspring.service.DbShopService;
+import com.spring.javawspring.service.MemberService;
+import com.spring.javawspring.vo.DbCartVO;
 import com.spring.javawspring.vo.DbOptionVO;
+import com.spring.javawspring.vo.DbOrderVO;
 import com.spring.javawspring.vo.DbProductVO;
+import com.spring.javawspring.vo.MemberVO;
+import com.spring.javawspring.vo.PayMentVO;
 
 @Controller
 @RequestMapping("/dbShop")
@@ -34,6 +41,9 @@ public class DbShopController {
 	
 	@Autowired
 	PageProcess pageProcess;
+	
+	@Autowired
+	MemberService memberService;
 	
 	/* 분류 카테고리 폼 */
 	@RequestMapping(value="/dbCategory", method=RequestMethod.GET)
@@ -308,6 +318,130 @@ public class DbShopController {
 		model.addAttribute("optionVos", optionVos);
 		
 		return "dbShop/dbProductContent";
+	}
+	
+	/* 상품상세정보창에서 '장바구니' or '주문하기' 버튼 클릭 시, 모두 이곳을 거쳐서 이동 처리 */
+	// '장바구니'버튼에서는 '다시쇼핑하기' 처리 / '주문하기'버튼에서는 '주문창'으로 보내도록 처리했음
+	@RequestMapping(value="/dbProductContent", method=RequestMethod.POST)
+	public String dbProductContentPost(DbCartVO vo, HttpSession session, String flag) {
+		String mid = (String) session.getAttribute("sMid");
+		// DbCartVO(vo) : 사용자가 선택한 품목(기본품목+옵션)의 정보를 담고 있는 VO
+		// DbCartVO(resVo) : 사용자가 기존에 장바구니에 담아놓은 적이 있는 품목(기본품목+옵션)의 정보를 담고 있는 VO
+		
+		// 장바구니 담을 시, 동일한 품목(제품)이라면 수량 누적 
+		DbCartVO resVo = dbShopService.getDbCartProductOptionSearch(vo.getProductName(), vo.getOptionName(), mid);
+		
+		// 아래 if문은 나에게 맞게 설계해야 할 부분!
+		if(resVo != null) { // 기존에 구매한 적이 있었다면, '현재구매내역' + '기존장바구니수량' 합쳐 update 시켜줘야 함
+			// JS에서(script)는 동적배열(ex)dbProductContent.jsp) 선언이 가능하지만, java는 XXX
+			String[] voOptionNums = vo.getOptionNum().split(",");
+			String[] resOptionNums = resVo.getOptionNum().split(",");
+			int[] nums = new int[99];
+			String strNums = "";
+			for(int i=0; i<voOptionNums.length; i++) {
+				// strNums : 옵션index(0번옵션) + 옵션선택수량(2개) 합쳐 DB 저장 -> 0 + 2 = 2 
+				nums[i] += (Integer.parseInt(voOptionNums[i]) + Integer.parseInt(resOptionNums[i]));
+				strNums += nums[i];
+				// 반복문 돌면서, 마지막 쉼표 제외 전까지 쉼표 추가
+				if(i < nums.length - 1) strNums += ",";
+			}
+			vo.setOptionNum(strNums);
+			dbShopService.setDbShopCartUpdate(vo);
+		}
+		else {
+			// 처음 구매하는 제품이라면 장바구니에 insert
+			dbShopService.setDbShopCartInput(vo);
+		}
+		
+		if(flag.equals("order")) {
+			return "redirect:/msg/cartOrderOk";
+		}
+		else {
+			return "redirect:/msg/cartInputOk";
+		}
+	}
+	
+	/* 장바구니에 담겨있는 모든 상품들의 내역을 보여줌 - 주문 전단계(장바구니는 DB에 있는 자료를 바로 불러와서 처리하면 됨) */
+	@RequestMapping(value="/dbCartList", method=RequestMethod.GET)
+	public String dbCartGet(HttpSession session, DbCartVO vo, Model model) {
+		String mid = (String) session.getAttribute("sMid");
+		List<DbCartVO> vos = dbShopService.getDbCartList(mid);
+		
+		if(vos.size() == 0) {
+			// 없다면 넘어가지 않도록 처리했지만, 혹시모르니 메세지 생성
+			return "redirect:/msg/cartEmpty";
+		}
+		
+		model.addAttribute("cartListVos", vos);
+		return "dbShop/dbCartList";
+	}
+	
+	/* 장바구니에서 품목 삭제버튼 처리 */
+	@ResponseBody
+	@RequestMapping(value="/dbCartDelete", method=RequestMethod.POST)
+	public String dbCartDeleteGet(int idx) {
+		dbShopService.dbCartDelete(idx);
+		return "";
+	}
+	
+	/* 카트에 담겨있는 품목들 중 주문한 품목들을 읽어와서 세션에 담아줌. 이때 고객의 정보도 함께 처리하며, 주문번호를 만들어 다음단계인 '결제'로 넘겨줌 */
+	@RequestMapping(value="/dbCartList", method=RequestMethod.POST)
+	public String dbCartListPost(HttpServletRequest request, Model model, HttpSession session,
+			@RequestParam(name="baesong", defaultValue = "0", required = false) int baesong) {
+		String mid = session.getAttribute("sMid").toString();
+		
+		// 주문한 상품의 '고유번호' 생성
+		// 고유주문번호(idx) : 기존에 존재하는 주문테이블의 고유번호+1
+		DbOrderVO maxIdx = dbShopService.getOrderMaxIdx();
+		int idx = 1;
+		if(maxIdx != null) idx = maxIdx.getMaxIdx() + 1;
+		
+		// 주문번호(날짜)
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String orderIdx = sdf.format(today) + idx;
+		
+		// 앞(jsp에서 checkItem)에서 선택된 것들(값이 1인 것)만 주문하겠다. (배열로 넘어옴)
+		String[] idxChecked = request.getParameterValues("idxChecked");
+		
+		DbCartVO cartVo = new DbCartVO();
+		List<DbOrderVO> orderVos = new ArrayList<DbOrderVO>();
+		
+		for(String strIdx : idxChecked) {
+			// dbCart에 담긴 정보를 가져와서 orderVo로 모두 담는 작업
+			// service에서 idx 변수명 변경!!!
+			cartVo = dbShopService.getCartIdx(Integer.parseInt(strIdx));
+			DbOrderVO orderVo = new DbOrderVO();
+			orderVo.setProductIdx(cartVo.getProductIdx());
+			orderVo.setProductName(cartVo.getProductName());
+			orderVo.setMainPrice(cartVo.getMainPrice());
+			orderVo.setThumbImg(cartVo.getThumbImg());
+			orderVo.setOptionName(cartVo.getOptionName());
+			orderVo.setOptionPrice(cartVo.getOptionPrice());
+			orderVo.setOptionNum(cartVo.getOptionNum());
+			orderVo.setTotalPrice(cartVo.getTotalPrice());
+			orderVo.setCartIdx(cartVo.getIdx());
+			orderVo.setBaesong(baesong);
+			
+			orderVo.setOrderIdx(orderIdx);
+			orderVo.setMid(mid);
+			
+			orderVos.add(orderVo);
+		}
+		// model에 담으면 절대 안됨. 무조건 session에 담아야 함! (다음단계 넘어가면 정보들이 날아감)
+		session.setAttribute("sOrderVos", orderVos);
+		
+		// 배송처리를 위해 현재 로그인된 사용자(고객)의 정보를 member2테이블에서 가져옴
+		MemberVO memberVo = memberService.getMemberIdCheck(mid);
+		model.addAttribute("memberVo", memberVo);
+		
+		return "dbShop/dbOrder";
+	}
+	
+	/* 아임포트(KG이니시스) 결제 프로그램 사용 */
+	@RequestMapping(value = "/sample", method = RequestMethod.POST)
+	public String samplePost(PayMentVO vo) {
+		return "dbShop/sample";
 	}
 
 }

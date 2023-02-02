@@ -78,8 +78,9 @@
     
     // 장바구니 호출시 수행함수
     function cart() {
+    	// 주문금액 = 0 -> 옵션선택 알람창
     	if(document.getElementById("totalPrice").value==0) {
-    		alert("옵션을 선택해주세요");
+    		alert("옵션을 선택해주세요.");
     		return false;
     	}
     	else {
@@ -87,7 +88,7 @@
     	}
     }
     
-    // 직접 주문하기
+    // 직접 주문하기 (flag에 따라서, order 또는 cart)
     function order() {
     	let totalPrice = document.getElementById("totalPrice").value;
     	if('${sMid}' == "") {

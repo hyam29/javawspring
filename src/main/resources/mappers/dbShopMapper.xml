@@ -115,6 +115,23 @@
 		select count(*) from dbOption where productIdx = #{productIdx} and optionName = #{optionName};
 	</select>
 	
+	<select id="getDbCartProductOptionSearch" resultType="com.spring.javawspring.vo.DbCartVO">
+		select * from dbCart where productName = #{productName} and optionName = #{optionName} and mid = #{mid};
+	</select>
+	
+	<select id="getDbCartList" resultType="com.spring.javawspring.vo.DbCartVO">
+		select * from dbCart where mid = #{mid} order by idx;
+	</select>
+	
+	<!-- vo에 변수명을 maxIdx로 설정해둬서 as maxIdx 작성 필수 -->
+	<select id="getOrderMaxIdx" resultType="com.spring.javawspring.vo.DbOrderVO">
+		select max(idx) as maxIdx from dbOrder;
+	</select>
+	
+	<select id="getCartIdx" resultType="com.spring.javawspring.vo.DbCartVO">
+		select * from dbCart where idx = #{idx};
+	</select>
+	
 	
 	
 	<insert id="setCategoryMainInput">
@@ -137,6 +154,17 @@
   	insert into dbOption values (default, #{vo.productIdx}, #{vo.optionName}, #{vo.optionPrice});
   </insert>
   
+  <insert id="setDbShopCartInput">
+  	insert into dbCart values (default,default,#{vo.mid},#{vo.productIdx},#{vo.productName},#{vo.mainPrice},#{vo.thumbImg},#{vo.optionIdx},#{vo.optionName},#{vo.optionPrice},#{vo.optionNum},#{vo.totalPrice});
+  </insert>
+  
+  
+  
+  <update id="setDbShopCartUpdate">
+  	update dbCart set optionNum = #{vo.optionNum}, totalPrice = totalPrice + #{vo.totalPrice} 
+  	where productName = #{vo.productName} and optionName = #{vo.optionName};
+  </update>
+  
 	
 	
 	<delete id="setCategoryMainDelete">
@@ -153,6 +181,10 @@
   
   <delete id="setOptionDelete">
     delete from dbOption where idx = #{idx};
+  </delete>
+  
+  <delete id="dbCartDelete">
+    delete from dbCart where idx = #{idx};
   </delete>
 </mapper>
 

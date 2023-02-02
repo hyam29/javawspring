@@ -18,7 +18,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.dao.DbShopDAO;
+import com.spring.javawspring.vo.DbCartVO;
 import com.spring.javawspring.vo.DbOptionVO;
+import com.spring.javawspring.vo.DbOrderVO;
 import com.spring.javawspring.vo.DbProductVO;
 
 @Service
@@ -253,6 +255,41 @@ public class DbShopServiceImpl implements DbShopService {
 	@Override
 	public void setOptionDelete(int idx) {
 		dbShopDAO.setOptionDelete(idx);
+	}
+
+	@Override
+	public DbCartVO getDbCartProductOptionSearch(String productName, String optionName, String mid) {
+		return dbShopDAO.getDbCartProductOptionSearch(productName, optionName, mid);
+	}
+
+	@Override
+	public void setDbShopCartUpdate(DbCartVO vo) {
+		dbShopDAO.setDbShopCartUpdate(vo);
+	}
+
+	@Override
+	public void setDbShopCartInput(DbCartVO vo) {
+		dbShopDAO.setDbShopCartInput(vo);
+	}
+
+	@Override
+	public List<DbCartVO> getDbCartList(String mid) {
+		return dbShopDAO.getDbCartList(mid);
+	}
+
+	@Override
+	public void dbCartDelete(int idx) {
+		dbShopDAO.dbCartDelete(idx);
+	}
+
+	@Override
+	public DbOrderVO getOrderMaxIdx() {
+		return dbShopDAO.getOrderMaxIdx();
+	}
+
+	@Override
+	public DbCartVO getCartIdx(int idx) {
+		return dbShopDAO.getCartIdx(idx);
 	}
 	
 }

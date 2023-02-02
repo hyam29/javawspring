@@ -574,9 +574,7 @@ public class MemberController {
 		if(!passwordEncoder.matches(pwd, vo.getPwd())) {
 			return "redirect:/msg/memberUpdatePwdNo";
 		}
-		else if(passwordEncoder.matches(pwd, vo.getPwd())) {
-			memberService.setMemberDelete(mid);
-		}
+		else if(passwordEncoder.matches(pwd, vo.getPwd())) {}
 		return "redirect:/msg/memberUpdatePwdOk";
 		
 	}
