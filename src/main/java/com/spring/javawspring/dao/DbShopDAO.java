@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.spring.javawspring.vo.DbBaesongVO;
 import com.spring.javawspring.vo.DbCartVO;
 import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbOrderVO;
@@ -79,6 +80,29 @@ public interface DbShopDAO {
 
 	public DbCartVO getCartIdx(@Param("idx") int idx);
 
+	public void setDbOrder(@Param("vo") DbOrderVO vo);
+
+	public void dbCartDeleteAll(@Param("idx") int idx);
+
+	public void setDbBaesong(@Param("baesongVo") DbBaesongVO baesongVo);
+
+	public void setMemberPointPlus(@Param("point") int point, @Param("mid") String mid);
+
+	public int totRecCnt(@Param("mid") String mid);
+
+	public List<DbProductVO> getMyOrderList(@Param("startIdxNo") int startIdxNo, @Param("pageSize") int pageSize, @Param("mid") String mid);
+
+	// 페이징처리 매개변수로 넘어온 변수명들 모두 수정 필수!
+	public int totRecCntMyOrderStatus(@Param("mid") String mid, @Param("startJumun") String startJumun, @Param("endJumun") String endJumun, @Param("conditionOrderStatus") String conditionOrderStatus);
+
+	public List<DbBaesongVO> getMyOrderStatus(@Param("startIdxNo") int startIdxNo, @Param("pageSize") int pageSize, @Param("mid") String mid, 
+			@Param("startJumun") String startJumun, @Param("endJumun") String endJumun, @Param("conditionOrderStatus") String conditionOrderStatus);
+
+	public int totRecCntAdminStatus(@Param("startJumun") String startJumun, @Param("endJumun") String endJumun, @Param("orderStatus") String orderStatus);
+
+	public List<DbBaesongVO> getAdminOrderStatus(@Param("startIdxNo") int startIdxNo, @Param("pageSize") int pageSize, @Param("startJumun") String startJumun, @Param("endJumun") String endJumun, @Param("orderStatus") String orderStatus);
+
+	public void setOrderStatusUpdate(@Param("orderIdx") String orderIdx, @Param("orderStatus") String orderStatus);
 
 
 }

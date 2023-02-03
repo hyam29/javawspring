@@ -10,6 +10,7 @@
     <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
     <script>
         var IMP = window.IMP; 
+        // 아임포트에서 발급받은 key
         IMP.init("imp01378416"); 
         
         //function requestPay() {

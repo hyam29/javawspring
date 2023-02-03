@@ -19,7 +19,7 @@
 		  });
 		});
   
-	  // 결재하기
+	  // 결제하기
     function order() {
 		  var paymentCard = document.getElementById("paymentCard").value;
     	var payMethodCard = document.getElementById("payMethodCard").value;
@@ -38,7 +38,7 @@
     		alert("입금자명을 입력하세요.");
     		return false;
     	}
-    	var ans = confirm("결재하시겠습니까?");
+    	var ans = confirm("결제하시겠습니까?");
     	if(ans) {
     		if(paymentCard != "" && payMethodCard != "") {
     			document.getElementById("payment").value = "C"+paymentCard;
@@ -48,8 +48,8 @@
     			document.getElementById("payment").value = "B"+paymentBank;
     			document.getElementById("payMethod").value = payMethodBank;
     		}
-	    	// myform.action = "${ctp}/dbShop/payment";
-	    	myform.action = "${ctp}/dbShop/sample";
+	    	myform.action = "${ctp}/dbShop/payment";
+	    	// myform.action = "${ctp}/dbShop/sample";
 	    	myform.submit();
     	}
     }

@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.javawspring.dao.DbShopDAO;
+import com.spring.javawspring.vo.DbBaesongVO;
 import com.spring.javawspring.vo.DbCartVO;
 import com.spring.javawspring.vo.DbOptionVO;
 import com.spring.javawspring.vo.DbOrderVO;
@@ -290,6 +291,46 @@ public class DbShopServiceImpl implements DbShopService {
 	@Override
 	public DbCartVO getCartIdx(int idx) {
 		return dbShopDAO.getCartIdx(idx);
+	}
+
+	@Override
+	public void setDbOrder(DbOrderVO vo) {
+		dbShopDAO.setDbOrder(vo);
+	}
+
+	@Override
+	public void dbCartDeleteAll(int idx) {
+		dbShopDAO.dbCartDeleteAll(idx);
+	}
+
+	@Override
+	public void setDbBaesong(DbBaesongVO baesongVo) {
+		dbShopDAO.setDbBaesong(baesongVo);
+	}
+
+	@Override
+	public void setMemberPointPlus(int point, String mid) {
+		dbShopDAO.setMemberPointPlus(point, mid);
+	}
+
+	@Override
+	public List<DbProductVO> getMyOrderList(int startIdxNo, int pageSize, String mid) {
+		return dbShopDAO.getMyOrderList(startIdxNo, pageSize, mid);
+	}
+
+	@Override
+	public List<DbBaesongVO> getMyOrderStatus(int startIdxNo, int pageSize, String mid, String startJumun, String endJumun, String conditionOrderStatus) {
+		return dbShopDAO.getMyOrderStatus(startIdxNo, pageSize, mid, startJumun, endJumun, conditionOrderStatus);
+	}
+
+	@Override
+	public List<DbBaesongVO> getAdminOrderStatus(int startIdxNo, int pageSize, String startJumun, String endJumun, String orderStatus) {
+		return dbShopDAO.getAdminOrderStatus(startIdxNo, pageSize, startJumun, endJumun, orderStatus);
+	}
+
+	@Override
+	public void setOrderStatusUpdate(String orderIdx, String orderStatus) {
+		dbShopDAO.setOrderStatusUpdate(orderIdx, orderStatus);
 	}
 	
 }

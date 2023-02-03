@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.javawspring.dao.BoardDAO;
+import com.spring.javawspring.dao.DbShopDAO;
 import com.spring.javawspring.dao.GuestDAO;
 import com.spring.javawspring.dao.MemberDAO;
 import com.spring.javawspring.dao.PdsDAO;
@@ -26,6 +27,9 @@ public class PageProcess {
 	
 	@Autowired
 	WebMessageDAO webMessageDAO;
+	
+	@Autowired
+	DbShopDAO dbShopDAO;
 
 	// 3번째 매개변수는 게시판 별로 사용할 것이므로 section 이라는 변수명으로 둠 (마음대로 해도 됨)
 	// 4번째 매개변수 부터는 마음대로! (여기서는 part, searchString)
@@ -53,6 +57,23 @@ public class PageProcess {
 			int mSw = Integer.parseInt(searchString);
 			totRecCnt = webMessageDAO.totRecCnt(mid, mSw);
 		}
+		else if(section.equals("dbMyOrder")) {
+			String mid = part;
+			totRecCnt = dbShopDAO.totRecCnt(mid);
+		}
+		else if(section.equals("myOrderStatus")) {
+			String mid = part;
+			// searchString = startJumun + "@" + endJumun + "@" + conditionOrderStatus;
+			// searchString으로 넘어온 5, 6, 7번째 매개변수를 배열에 담아 넘겨줌
+			String[] searchStringArr = searchString.split("@");
+			totRecCnt = dbShopDAO.totRecCntMyOrderStatus(mid,searchStringArr[0],searchStringArr[1],searchStringArr[2]);
+		}
+		else if(section.equals("adminDbOrderProcess")) {
+			String[] searchStringArr = searchString.split("@");
+			totRecCnt = dbShopDAO.totRecCntAdminStatus(searchStringArr[0],searchStringArr[1],searchStringArr[2]);
+		}
+		
+		
 		
 		
 		/* 페이징처리 */
