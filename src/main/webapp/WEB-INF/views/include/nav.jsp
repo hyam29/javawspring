@@ -29,7 +29,8 @@
 	      <div class="w3-dropdown-content w3-bar-block w3-card-4">
 	        <a href="${ctp}/study/qrCode" class="w3-bar-item w3-button">쿠폰발급(QR코드)</a>
 	        <a href="${ctp}/study/kakaomap/kakaomap" class="w3-bar-item w3-button">카카오맵(API)</a>
-	        <a href="#" class="w3-bar-item w3-button">구글차트</a>
+	        <a href="${ctp}/study/googleChart" class="w3-bar-item w3-button">구글차트</a>
+	        <a href="${ctp}/study/googleChart2" class="w3-bar-item w3-button">구글차트2</a>
 	        <a href="${ctp}/errorPage/error" class="w3-bar-item w3-button">error연습</a>
 	        <a href="${ctp}/study/transaction/transaction" class="w3-bar-item w3-button">트랜잭션</a>
 	      </div>
@@ -51,6 +52,10 @@
 	        <a href="${ctp}/member/memberMain" class="w3-bar-item w3-button">회원메인</a>
 	        <a href="${ctp}/schedule/schedule" class="w3-bar-item w3-button">회원일정관리</a>
 	        <a href="${ctp}/webMessage/webMessage" class="w3-bar-item w3-button">웹메세지</a>
+	        <a href="${ctp}/webSocket" class="w3-bar-item w3-button">웹소켓채팅</a>
+	        <a href="${ctp}/webSocketDb" class="w3-bar-item w3-button">웹소켓DB채팅</a>
+	        <%-- <a href="${ctp}/webSocket/chat" class="w3-bar-item w3-button">채팅창띄우기</a> --%>
+	        <a href="javascript:newChat()" class="w3-bar-item w3-button">채팅창띄우기</a>
 	        <a href="${ctp}/member/memberList" class="w3-bar-item w3-button">회원리스트</a>
 	        <a href="${ctp}/member/memberPwdCheck" class="w3-bar-item w3-button">회원정보수정</a>
 	        <a href="${ctp}/member/memberPwdUpdate" class="w3-bar-item w3-button">비밀번호수정</a>

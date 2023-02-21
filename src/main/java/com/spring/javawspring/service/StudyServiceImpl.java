@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -35,10 +34,13 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.spring.javawspring.common.DistanceCal;
 import com.spring.javawspring.dao.StudyDAO;
+import com.spring.javawspring.vo.ChartVO;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
 import com.spring.javawspring.vo.TransactionVO;
+
+import net.coobird.thumbnailator.Thumbnailator;
 
 @Service
 public class StudyServiceImpl implements StudyService {
@@ -501,6 +503,59 @@ public class StudyServiceImpl implements StudyService {
 	public void setTransInput(TransactionVO vo) {
 		studyDAO.setTransInput(vo);
 		
+	}
+
+	@Override
+	public int thumbnailCreate(MultipartFile file) {
+		int res = 0;
+		try {
+			UUID uid = UUID.randomUUID();
+			String oFileName = file.getOriginalFilename();
+			String saveFileName = uid + "_" + oFileName;
+			// writeFile2(file, saveFileName);		// 사용자정의 메소드로 원본 이미지 저장 : 이곳에서는 썸네일라이브러리를 사용하려고 이부분은 생략처리했다.
+			
+			// 아래는 MultipartFile객체로 원본이미지 저장하고, Thumbnailator객체로 썸네일 저장하기
+			HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+			String realPath = request.getSession().getServletContext().getRealPath("/resources/data/thumbnail/");
+			File realFileName = new File(realPath + saveFileName);
+			file.transferTo(realFileName);	// 원본 이미지 저장
+			
+		  // 썸네일 생성 (썸네일 파일 이름은 "s_"로 시작하도록 : '/' -> File.separator)
+      String thumbnailSaveName = realPath + "s_" + saveFileName;
+      File thumbnailFile = new File(thumbnailSaveName);
+
+      int width = 150;	// 가로가 긴 사진은 width를 기준으로, 세로가 긴 사진은 height값을 기준으로 비례되게 생성시킨다.
+      int height = 150;	// width값과 height값중에서 적은값을 기준으로 비례되게 적용시켜 생성됨. 따라서 보통 같은 값을 주는것이 좋다.
+      
+      // 썸네일 라이브러리(Thumbnailator)를 이용한 썸네일 이미지로 저장하기 : createThumbnail(원본이미지,썸네일이미지,폭,높이)
+      Thumbnailator.createThumbnail(realFileName, thumbnailFile,width,height);
+
+      // 앞의 Thumbnailator.createThumbnail() 를 이용하지 않고, 아래 2줄처럼 BufferedImage로 생성하여 ImageIO.write()로 저장해도 된다.
+//      BufferedImage thumbnail = Thumbnails.of(realFileName).size(width, height).asBufferedImage();
+//      ImageIO.write(thumbnail, "png", thumbnailFile);
+      
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	// 사용자가 만든 이미지 저장메소드
+	public void writeFile2(MultipartFile fName, String saveFileName) throws IOException {
+		byte[] data = fName.getBytes();
+		
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/thumbnail/");
+		
+		FileOutputStream fos = new FileOutputStream(realPath + saveFileName);
+		fos.write(data);
+		fos.close();
+	}
+
+	@Override
+	public List<ChartVO> getRecentlyVisitCount(int i) {
+		return studyDAO.getRecentlyVisitCount(i);
 	}
 	
 	

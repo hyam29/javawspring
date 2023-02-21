@@ -266,7 +266,7 @@
 		delete from categoryMain where categoryMainCode = #{categoryMainCode};
 	</delete>
 	
-	 <delete id="setCategoryMiddleDelete">
+	<delete id="setCategoryMiddleDelete">
     delete from categoryMiddle where categoryMiddleCode = #{categoryMiddleCode};
   </delete>
   

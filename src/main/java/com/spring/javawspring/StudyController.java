@@ -1,5 +1,14 @@
 package com.spring.javawspring;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -7,11 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -30,6 +42,7 @@ import com.spring.javawspring.common.ARIAUtil;
 import com.spring.javawspring.common.SecurityUtil;
 import com.spring.javawspring.service.MemberService;
 import com.spring.javawspring.service.StudyService;
+import com.spring.javawspring.vo.ChartVO;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.MailVO;
@@ -54,6 +67,7 @@ public class StudyController {
 	// 우두머리인 인터페이스를 autowired 어노테이션! (class로 생성해도 상관은 없음...)
 	@Autowired
 	JavaMailSender mailSender;
+	
 	
 	@RequestMapping(value="/ajax/ajaxMenu", method=RequestMethod.GET)
 	public String ajaxMenuGet() {
@@ -572,6 +586,202 @@ public class StudyController {
 		model.addAttribute("vo", vo);
 		session.removeAttribute("sPayMentVO");
 		return "study/merchant/merchantOk";
+	}
+	
+	
+	// 캡차(컴퓨터와 사람을 구분하기 위한 완전 자동화된 공개 튜링 테스트) - 이미지 제작및 실행
+	@RequestMapping(value = "/captchaImage", method = RequestMethod.GET)
+	public String captchaPost(HttpServletRequest request, HttpServletResponse response) {
+	  try {
+	    // 알파벳 숫자섞인 5자리 문자열을 랜덤하게 생성
+	    String randomString = RandomStringUtils.randomAlphanumeric(5).toUpperCase();
+	    // System.out.println("randomString : " + randomString);
+	
+	    // 세션에 저장
+	    request.getSession().setAttribute("CAPTCHA", randomString);
+	
+	    // 시스템에 등록된 폰트들 이름을 확인
+	    /*
+	    Font[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
+	    for( Font f : fontList){
+	        System.out.println(f.getName());
+	    }
+	     */
+	    Font font = new Font("Jokerman", Font.ITALIC, 30);
+	    FontRenderContext frc = new FontRenderContext(null, true, true);
+	    Rectangle2D bounds = font.getStringBounds(randomString, frc);
+	    int w = (int) bounds.getWidth();
+	    int h = (int) bounds.getHeight();
+	
+	    // 이미지 생성
+	    BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+	    Graphics2D g = image.createGraphics();
+	    g.setColor(Color.WHITE);
+	    g.fillRect(0, 0, w, h);
+	    g.setColor(new Color(0, 156, 240));
+	    g.setFont(font);
+	    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+	    g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+	    g.drawString(randomString, (float) bounds.getX(), (float) -bounds.getY());
+	    g.dispose();
+	
+	    // ImageIO.write(image, "png",  response.getOutputStream());  // OutputStream을 이용해 헤더를 통해 직접 클라이언트로 전송
+	
+	    String realPath = request.getSession().getServletContext().getRealPath("/resources/images/");
+	    ImageIO.write(image, "png", new File(realPath + "captcha.png"));
+	  } catch (IOException e) {
+	    e.printStackTrace();
+	  }
+	  return "study/captcha/captcha";
+	}
+
+	 // 캡차(컴퓨터와 사람을 구분하기 위한 완전 자동화된 공개 튜링 테스트) - 폼 보기
+	 @RequestMapping(value = "/captcha", method = RequestMethod.GET)
+	 public String captchaGet() {
+		 // return "study/captcha/captcha";
+		 return "redirect:/study/captchaImage";
+	 }
+	
+	 // 캡차(컴퓨터와 사람을 구분하기 위한 완전 자동화된 공개 튜링 테스트) - 결과 비교하여 통보하기
+	 @ResponseBody
+	 @RequestMapping(value = "/captcha", method = RequestMethod.POST)
+	 public String captchaPost(HttpSession session, String strCaptcha) {
+	   if(strCaptcha.equals(session.getAttribute("CAPTCHA").toString())) return "1";
+	   else return "0";
+	 }
+	 
+	 // 썸네일생성하기 폼 보기
+	 @RequestMapping(value = "/thumbnail", method = RequestMethod.GET)
+	 public String thumbnailGet() {
+	 	return "study/thumbnail/thumbnail";
+	 }
+	 
+	 // 썸네일 만들기
+	 @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
+	 public String thumbnailPost(MultipartFile file) {
+	 	int res = studyService.thumbnailCreate(file);
+			if(res == 1) return "redirect:/msg/thumbnailCreateOk";
+			else  return "redirect:/msg/thumbnailCreateNo";
+	 }
+	 
+	 // 썸네일결과 폼 보기
+	 @RequestMapping(value = "/thumbnailResult", method = RequestMethod.GET)
+	 public String thumbnailResultGet(HttpServletRequest request, Model model) {
+			String realPath = request.getSession().getServletContext().getRealPath("/resources/data/thumbnail/");
+			
+			String[] files = new File(realPath).list();
+			
+			model.addAttribute("files", files);
+	 		
+	 	return "study/thumbnail/thumbnailResult";
+	 }
+
+	// 선택된 파일 삭제처리하기
+	@ResponseBody
+	@RequestMapping(value = "/thumnailDelete", method = RequestMethod.POST)
+	public String thumnailDeleteGet(HttpServletRequest request, String delItems) {
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/thumbnail/");
+		
+		String[] fileNames = delItems.split("/");
+		
+		for(String fileName : fileNames) {
+			String realPathFile = realPath + fileName;
+			new File(realPathFile).delete();
+		}
+		
+		return "";
+	}
+
+	// 구글차트만들기
+	@RequestMapping(value="/googleChart", method=RequestMethod.GET)
+	public String googleChartGet(Model model,
+			@RequestParam(name="part", defaultValue="bar", required=false) String part) {
+		model.addAttribute("part", part);
+		return "study/chart/chart";
+	}
+	
+	// 구글차트만들기2 - 자료 입력하여 차크 만들기
+	@RequestMapping(value="/googleChart2", method=RequestMethod.GET)
+	public String googleChartGet2(Model model,
+			@RequestParam(name="part", defaultValue="bar", required=false) String part) {
+		model.addAttribute("part", part);
+		return "study/chart2/chart";
+	}
+	
+	@RequestMapping(value="/googleChart2", method=RequestMethod.POST)
+	public String googleChart2Post(Model model,
+			ChartVO vo) {
+		model.addAttribute("vo", vo);
+		return "study/chart2/chart";
+	}
+	
+	// 최근 방문자수 차트로 표시하기
+	@RequestMapping(value="/googleChart2Recently", method=RequestMethod.GET)
+	public String googleChart2RecentlyGet(Model model,
+			@RequestParam(name="part", defaultValue="line", required=false) String part) {
+		//System.out.println("part : " + part);
+		List<ChartVO> vos = null;
+		if(part.equals("lineChartVisitCount")) {
+			vos = studyService.getRecentlyVisitCount(1);
+			// vos로 차트에서 처리가 잘 안되는것 같아서 다시 배열로 담아서 처리해본다.
+			String[] visitDates = new String[7];
+			int[] visitDays = new int[7];	// line차트는 x축과 y축이 모두 숫자가 와야하기에 날짜중에서 '일'만 담기로 한다.(정수타입으로)
+			int[] visitCounts = new int[7];
+			for(int i=0; i<7; i++) {
+				visitDates[i] = vos.get(i).getVisitDate();
+				visitDays[i] = Integer.parseInt(vos.get(i).getVisitDate().toString().substring(8));
+				visitCounts[i] = vos.get(i).getVisitCount();
+			}
+			
+			model.addAttribute("title", "최근 7일간 방문횟수");
+			model.addAttribute("subTitle", "최근 7일동안 방문한 해당일자 방문자 총수를 표시합니다.");
+			model.addAttribute("visitCount", "방문횟수");
+			model.addAttribute("legend", "일일 방문 총횟수");
+			model.addAttribute("topTitle", "방문날짜");
+			model.addAttribute("xTitle", "방문날짜");
+			model.addAttribute("part", part);
+//			model.addAttribute("vos", vos);
+			model.addAttribute("visitDates", visitDates);
+			model.addAttribute("visitDays", visitDays);
+			model.addAttribute("visitCounts", visitCounts);
+		}
+		
+		return "study/chart2/chart";
+	}
+	
+	// 많이찾은 방문자 7명 차트로 표시하기
+	@RequestMapping(value="/googleChart2Recently2", method=RequestMethod.GET)
+	public String googleChart2Recently2Get(Model model,
+			@RequestParam(name="part", defaultValue="line", required=false) String part) {
+		List<ChartVO> vos = null;
+		if(part.equals("lineChartVisitCount2")) {
+			vos = studyService.getRecentlyVisitCount(2);
+//			System.out.println("part : " + part);
+//			System.out.println("vos : " + vos);
+			// vos로 차트에서 처리가 잘 안되는것 같아서 다시 배열로 담아서 처리해본다.
+			String[] visitDates = new String[7];
+			int[] visitDays = new int[7];	// line차트는 x축과 y축이 모두 숫자가 와야하기에 날짜중에서 '일'만 담기로 한다.(정수타입으로)
+			int[] visitCounts = new int[7];
+			for(int i=0; i<7; i++) {
+				visitDates[i] = vos.get(i).getVisitDate();
+				visitDays[i] = 7 - i;
+				visitCounts[i] = vos.get(i).getVisitCount();
+			}
+			
+			model.addAttribute("title", "많이 방문한 회원 7명");
+			model.addAttribute("subTitle", "가장 많이 방문한 방문자 7인을 표시합니다.");
+			model.addAttribute("visitCount", "방문횟수");
+			model.addAttribute("legend", "방문 총횟수");
+			model.addAttribute("topTitle", "회원아이디");
+			model.addAttribute("xTitle", "회원아이디");
+			model.addAttribute("part", part);
+//			model.addAttribute("vos", vos);
+			model.addAttribute("visitDates", visitDates);
+			model.addAttribute("visitDays", visitDays);
+			model.addAttribute("visitCounts", visitCounts);
+		}
+		
+		return "study/chart2/chart";
 	}
 	
 }

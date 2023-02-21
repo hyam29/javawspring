@@ -175,6 +175,10 @@ public class MessageController {
 			model.addAttribute("msg", "결제가 정상적으로 완료되었습니다.");
 			model.addAttribute("url", "dbShop/paymentResultOk");
 		}
+		else if(msgFlag.equals("thumbnailCreateOk")) {
+			model.addAttribute("msg", "썸네일 이미지가 저장되었습니다.");
+			model.addAttribute("url", "study/thumbnailResult");
+		}
 		
 		
 		return "include/message";

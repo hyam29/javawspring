@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spring.javawspring.vo.ChartVO;
 import com.spring.javawspring.vo.GuestVO;
 import com.spring.javawspring.vo.KakaoAddressVO;
 import com.spring.javawspring.vo.QrCodeVO;
@@ -53,5 +54,9 @@ public interface StudyService {
 	public List<TransactionVO> setTransList();
 
 	public void setTransInput(TransactionVO vo);
+
+	public int thumbnailCreate(MultipartFile file);
+
+	public List<ChartVO> getRecentlyVisitCount(int i);
 	
 }

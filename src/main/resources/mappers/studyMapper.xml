@@ -35,6 +35,15 @@
 		select u1.*, u2.nickName as nickName, u2.job as job from user u1 join user2 u2 on u1.mid=u2.mid order by idx desc;
   </select>
   
+  <select id="getRecentlyVisitCount" resultType="com.spring.javawspring.vo.ChartVO">
+    <if test="i == 1">
+    	select substring(visitDate,1,10) as visitDate,visitCount from visit order by visitDate desc limit 7;
+    </if>
+    <if test="i == 2">
+	    select mid as visitDate,visitCnt as visitCount from member2 order by visitCnt desc limit 7;
+    </if>
+  </select>
+  
 	
 	
 	<insert id="setMovieReservation">
